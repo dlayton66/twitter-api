@@ -1,6 +1,11 @@
 package com.cooksys.twitter_api.entities;
 
+import com.cooksys.twitter_api.embeddables.Credentials;
+import com.cooksys.twitter_api.embeddables.Profile;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -25,28 +30,26 @@ public class User {
   @GeneratedValue
   private Integer id;
 
-  @Column(nullable = false, unique = true)
-  private String username;
-
-  @Column(nullable = false)
-  private String password;
-
   @CreationTimestamp
   @Column(nullable = false)
   private Timestamp joined;
 
   private boolean deleted = false;
 
-  @Column(name="`firstName`")
-  private String firstName;
+  @Embedded
+  @AttributeOverrides({
+          @AttributeOverride(name = "username", column = @Column(nullable = false, unique = true)),
+          @AttributeOverride(name = "password", column = @Column(nullable = false))
+  })
+  private Credentials credentials;
 
-  @Column(name="`lastName`")
-  private String lastName;
-
-  @Column(nullable = false)
-  private String email;
-
-  private String phone;
+  @Embedded
+  @AttributeOverrides({
+          @AttributeOverride(name = "firstName", column = @Column(name="`firstName`")),
+          @AttributeOverride(name = "lastName", column = @Column(name="`lastName`")),
+          @AttributeOverride(name = "email", column = @Column(nullable = false))
+  })
+  private Profile profile;
 
   @ManyToMany(mappedBy = "likes")
   Set<Tweet> likes;
