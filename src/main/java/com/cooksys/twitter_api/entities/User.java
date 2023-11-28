@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -24,10 +25,14 @@ public class User {
   @GeneratedValue
   private Integer id;
 
+  @Column(nullable = false, unique = true)
   private String username;
 
+  @Column(nullable = false)
   private String password;
 
+  @CreationTimestamp
+  @Column(nullable = false)
   private Timestamp joined;
 
   private boolean deleted = false;
@@ -38,6 +43,7 @@ public class User {
   @Column(name="`lastName`")
   private String lastName;
 
+  @Column(nullable = false)
   private String email;
 
   private String phone;

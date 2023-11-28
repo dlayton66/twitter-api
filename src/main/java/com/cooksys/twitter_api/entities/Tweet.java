@@ -1,5 +1,6 @@
 package com.cooksys.twitter_api.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -9,6 +10,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -23,9 +25,11 @@ public class Tweet {
   private Integer id;
 
   @ManyToOne
-  @JoinColumn(name = "author_id")
+  @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
+  @CreationTimestamp
+  @Column(nullable = false)
   private Timestamp posted;
 
   private boolean deleted = false;

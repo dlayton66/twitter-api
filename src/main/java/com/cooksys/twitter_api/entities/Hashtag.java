@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -20,12 +22,15 @@ public class Hashtag {
   @GeneratedValue
   private Integer id;
 
+  @Column(nullable = false, unique = true)
   private String label;
 
-  @Column(name = "`firstUsed`")
+  @CreationTimestamp
+  @Column(name = "`firstUsed`", nullable = false)
   private Timestamp firstUsed;
 
-  @Column(name = "`lastUsed`")
+  @UpdateTimestamp
+  @Column(name = "`lastUsed`", nullable = false)
   private Timestamp lastUsed;
 
   @ManyToMany(mappedBy = "hashtags")
