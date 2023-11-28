@@ -17,7 +17,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto, CredentialsDto credentialsDto) {
+    public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
         return null;
     }
 
@@ -72,7 +72,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> replyToTweet(int id, CredentialsDto credentialsDto, String content) {
+    public ResponseEntity<TweetResponseDto> replyToTweet(int id, TweetRequestDto tweetRequestDto) {
         return null;
     }
 

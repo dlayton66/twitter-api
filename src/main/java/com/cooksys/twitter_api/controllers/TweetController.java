@@ -20,8 +20,8 @@ public class TweetController {
     }
 
     @PostMapping
-    public TweetResponseDto createTweet(@RequestBody TweetRequestDto tweetRequestDto, @RequestBody CredentialsDto credentialsDto){
-        return tweetService.createTweet(tweetRequestDto, credentialsDto);
+    public TweetResponseDto createTweet(@RequestBody TweetRequestDto tweetRequestDto){
+        return tweetService.createTweet(tweetRequestDto);
     }
 
     @GetMapping("/{id}")
@@ -75,7 +75,7 @@ public class TweetController {
     }
 
     @PostMapping("/{id}/reply")
-    public void replyToTweet(@PathVariable int id, @RequestBody CredentialsDto credentialsDto, @RequestBody String content){
-        tweetService.replyToTweet(id, credentialsDto, content);
+    public ResponseEntity<TweetResponseDto> replyToTweet(@PathVariable int id, @RequestBody TweetRequestDto tweetRequestDto){
+        return tweetService.replyToTweet(id, tweetRequestDto);
     }
 }

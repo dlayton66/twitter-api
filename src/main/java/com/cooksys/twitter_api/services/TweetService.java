@@ -9,7 +9,7 @@ public interface TweetService {
 
     List<TweetResponseDto> getAllTweets();
 
-    TweetResponseDto createTweet(TweetRequestDto tweetRequestDto, CredentialsDto credentialsDto);
+    TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
 
     ResponseEntity<TweetResponseDto> getTweetById(int id);
 
@@ -32,5 +32,5 @@ public interface TweetService {
 
     void likeTweet(int id, CredentialsDto credentialsDto);
 
-    ResponseEntity<TweetResponseDto> replyToTweet(int id, CredentialsDto credentialsDto, String content);
+    ResponseEntity<TweetResponseDto> replyToTweet(int id, TweetRequestDto tweetRequestDto);
 }
