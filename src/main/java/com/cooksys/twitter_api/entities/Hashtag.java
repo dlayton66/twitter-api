@@ -18,7 +18,7 @@ public class Hashtag {
 
   @Id
   @GeneratedValue
-  private Long id;
+  private Integer id;
 
   private String label;
 

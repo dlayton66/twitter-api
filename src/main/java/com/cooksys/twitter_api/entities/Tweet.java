@@ -20,7 +20,7 @@ public class Tweet {
 
   @Id
   @GeneratedValue
-  private Long id;
+  private Integer id;
 
   @ManyToOne
   @JoinColumn(name = "author_id")
