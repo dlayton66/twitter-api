@@ -2,7 +2,6 @@ package com.cooksys.twitter_api.controllers;
 
 import com.cooksys.twitter_api.dtos.TweetResponseDto;
 import com.cooksys.twitter_api.services.HashtagService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,13 +17,13 @@ public class HashtagController {
     }
 
     @GetMapping
-    public ResponseEntity<List<String>> getAllHashtags() {
-        return ResponseEntity.ok(hashtagService.getAllHashtags());
+    public List<String> getAllHashtags() {
+        return hashtagService.getAllHashtags();
     }
 
     @GetMapping("/{label}")
-    public ResponseEntity<List<TweetResponseDto>> getTweetsByHashtag(@PathVariable String label) {
-        return ResponseEntity.ok(hashtagService.getTweetsByHashtag(label));
+    public List<TweetResponseDto> getTweetsByHashtag(@PathVariable String label) {
+        return hashtagService.getTweetsByHashtag(label);
     }
 
 }
