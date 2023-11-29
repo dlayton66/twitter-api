@@ -45,8 +45,14 @@ public class TweetServiceImpl implements TweetService {
     @Override
     @Transactional
     public ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto) {
-        //TODO: Check Credentials, not sure how to do that yet.
-
+        //TODO: Check Credentials using the validationService probably, instead of this way.
+        Optional<User> author = userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername());
+        if(author.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(!tweetRequestDto.getCredentials().getPassword().equals(author.get().getCredentials().password)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         // Map request to Entity.
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
 
