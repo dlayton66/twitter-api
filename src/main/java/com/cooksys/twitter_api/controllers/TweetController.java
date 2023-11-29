@@ -20,7 +20,7 @@ public class TweetController {
     }
 
     @PostMapping
-    public TweetResponseDto createTweet(@RequestBody TweetRequestDto tweetRequestDto){
+    public ResponseEntity<TweetResponseDto> createTweet(@RequestBody TweetRequestDto tweetRequestDto){
         return tweetService.createTweet(tweetRequestDto);
     }
 
