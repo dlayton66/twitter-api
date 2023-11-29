@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface HashtagRepository extends JpaRepository<Hashtag, Integer> {
-    // Optional<Hashtag> findByContent(String content);
+  Optional<Hashtag> findByLabel(String label);
 
   boolean existsHashtagByLabel(String label);
 

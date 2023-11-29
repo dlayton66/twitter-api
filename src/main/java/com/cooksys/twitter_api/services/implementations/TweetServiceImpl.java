@@ -66,7 +66,7 @@ public class TweetServiceImpl implements TweetService {
         for (String eachHashtag : allHashtagStrings) {
             // Check if they are already represented in the Repository,
             // and put them in one of the two lists.
-            Optional<Hashtag> hashtagsDatabaseEntry = hashtagRepository.findByContent(eachHashtag);
+            Optional<Hashtag> hashtagsDatabaseEntry = hashtagRepository.findByLabel(eachHashtag);
             if (hashtagsDatabaseEntry.isEmpty()) {
                 // Build a new hashtag entity for new hashtags.
                 Hashtag newHashtagEntity = new Hashtag();
