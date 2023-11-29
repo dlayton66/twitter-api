@@ -9,7 +9,7 @@ public interface TweetService {
 
     List<TweetResponseDto> getAllTweets();
 
-    TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
+    ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto);
 
     ResponseEntity<TweetResponseDto> getTweetById(int id);
 
