@@ -6,8 +6,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/tags")
+@RequiredArgsConstructor
 public class HashtagController {
 
     private final HashtagService hashtagService;
