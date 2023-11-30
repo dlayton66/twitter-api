@@ -5,17 +5,24 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude = "tweets")
 public class Hashtag {
 
   @Id
@@ -34,6 +41,6 @@ public class Hashtag {
   private Timestamp lastUsed;
 
   @ManyToMany(mappedBy = "hashtags")
-  Set<Tweet> tweets;
+  private Set<Tweet> tweets = new HashSet<>();
 
 }

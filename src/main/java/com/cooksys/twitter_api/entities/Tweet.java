@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -49,20 +50,20 @@ public class Tweet {
           name = "tweet_hashtags",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
-  Set<Hashtag> hashtags;
+  private Set<Hashtag> hashtags = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "user_likes",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  Set<User> likes;
+  private Set<User> likes = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "user_mentions",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  Set<User> mentions;
+  private Set<User> mentions = new HashSet<>();
 
 }
