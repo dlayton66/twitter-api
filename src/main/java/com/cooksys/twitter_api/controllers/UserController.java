@@ -27,7 +27,7 @@ public class UserController {
         return userService.createUser(userRequestDto.getCredentials(), userRequestDto.getProfile());
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/@{username}")
     public UserResponseDto getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
     }
