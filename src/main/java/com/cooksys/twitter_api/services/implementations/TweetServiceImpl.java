@@ -14,6 +14,7 @@ import com.cooksys.twitter_api.repositories.UserRepository;
 import com.cooksys.twitter_api.services.TweetService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.querydsl.binding.OptionalValueBinding;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +41,8 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<TweetResponseDto> getAllTweets() {
-        return null;
+        List<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
+        return tweetMapper.entitiesToResponseDtos(tweets);
     }
     @Override
     @Transactional
@@ -138,12 +141,21 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public ResponseEntity<TweetResponseDto> getTweetById(int id) {
-        return null;
+        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
+        if(requestedTweet.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToResponseDto(requestedTweet.get()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(int id) {
-        return null;
+        Optional<Tweet> originalTweet = tweetRepository.findById(id);
+        if(originalTweet.isEmpty() || originalTweet.get().isDeleted()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<TweetResponseDto> response = tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyTo(originalTweet.get(), Sort.by("posted").descending()));
+        return new ResponseEntity<List<TweetResponseDto>>(response, HttpStatus.OK);
     }
 
     @Override
