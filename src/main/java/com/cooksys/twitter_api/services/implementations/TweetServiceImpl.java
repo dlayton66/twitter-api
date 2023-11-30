@@ -139,7 +139,7 @@ public class TweetServiceImpl implements TweetService {
 
 
     @Override
-    public ResponseEntity<TweetResponseDto> getTweetById(int id) {
+    public ResponseEntity<TweetResponseDto> getTweetById(Long id) {
         Optional<Tweet> requestedTweet = tweetRepository.findById(id);
         if(requestedTweet.isEmpty()){
             throw new NotFoundException("No tweet found with id: " + id);
@@ -148,7 +148,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(int id) {
+    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(Long id) {
         Optional<Tweet> originalTweet = tweetRepository.findById(id);
         if(originalTweet.isEmpty() || originalTweet.get().isDeleted()){
             throw new NotFoundException("No tweet found with id: " + id);
@@ -158,7 +158,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(int id) {
+    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id) {
         Optional<Tweet> requestedTweet = tweetRepository.findById(id);
         if (requestedTweet.isEmpty()) {
             throw new NotFoundException("No tweet found with id: " + id);
@@ -168,42 +168,42 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(int id) {
+    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> repostTweet(int id, CredentialsDto credentialsDto) {
+    public ResponseEntity<TweetResponseDto> repostTweet(Long id, CredentialsDto credentialsDto) {
         return null;
     }
 
     @Override
-    public ResponseEntity<ContextDto> getContextOfTweet(int id) {
+    public ResponseEntity<ContextDto> getContextOfTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<UserResponseDto> getLikesOnTweet(int id) {
+    public ResponseEntity<UserResponseDto> getLikesOnTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<HashtagDto> getHashtagsOnTweet(int id) {
+    public ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> deleteTweet(int id, CredentialsDto credentialsDto) {
+    public ResponseEntity<TweetResponseDto> deleteTweet(Long id, CredentialsDto credentialsDto) {
         return null;
     }
 
     @Override
-    public void likeTweet(int id, CredentialsDto credentialsDto) {
+    public void likeTweet(Long id, CredentialsDto credentialsDto) {
 
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> replyToTweet(int id, TweetRequestDto tweetRequestDto) {
+    public ResponseEntity<TweetResponseDto> replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
         return null;
     }
 
