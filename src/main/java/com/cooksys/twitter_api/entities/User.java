@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @Table(name = "user_table")
@@ -52,18 +53,18 @@ public class User {
   private Profile profile;
 
   @ManyToMany(mappedBy = "likes")
-  Set<Tweet> likes;
+  Set<Tweet> likes  = new HashSet<>();
 
   @ManyToMany(mappedBy = "mentions")
-  Set<Tweet> mentions;
+  Set<Tweet> mentions = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "followers_following",
           joinColumns = @JoinColumn(name = "follower_id"),
           inverseJoinColumns = @JoinColumn(name = "following_id"))
-  Set<User> followers;
+  Set<User> followers = new HashSet<>();
 
   @ManyToMany(mappedBy = "followers")
-  Set<User> following;
+  Set<User> following = new HashSet<>();
 }

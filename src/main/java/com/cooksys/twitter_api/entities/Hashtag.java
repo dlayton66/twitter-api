@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -34,6 +35,6 @@ public class Hashtag {
   private Timestamp lastUsed;
 
   @ManyToMany(mappedBy = "hashtags")
-  Set<Tweet> tweets;
+  Set<Tweet> tweets = new HashSet<>();
 
 }
