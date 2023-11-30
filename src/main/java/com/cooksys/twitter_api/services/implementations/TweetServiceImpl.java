@@ -5,7 +5,7 @@ import com.cooksys.twitter_api.entities.Hashtag;
 import com.cooksys.twitter_api.entities.Tweet;
 import com.cooksys.twitter_api.entities.User;
 import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
-import com.cooksys.twitter_api.mappers.HashtagMapper;
+import com.cooksys.twitter_api.exceptions.NotFoundException;
 import com.cooksys.twitter_api.mappers.TweetMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
 import com.cooksys.twitter_api.repositories.HashtagRepository;
@@ -15,7 +15,6 @@ import com.cooksys.twitter_api.services.TweetService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.binding.OptionalValueBinding;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +35,7 @@ public class TweetServiceImpl implements TweetService {
     private final HashtagRepository hashtagRepository;
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
 
     @Override
@@ -50,10 +49,10 @@ public class TweetServiceImpl implements TweetService {
         //TODO: Check Credentials using the validationService probably, instead of this way.
         Optional<User> author = userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername());
         if(author.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new NotFoundException("No user found");
         }
         if(!tweetRequestDto.getCredentials().getPassword().equals(author.get().getCredentials().password)){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new NotAuthorizedException();
         }
         // Map request to Entity.
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
@@ -140,66 +139,73 @@ public class TweetServiceImpl implements TweetService {
 
 
     @Override
-    public ResponseEntity<TweetResponseDto> getTweetById(int id) {
+    public ResponseEntity<TweetResponseDto> getTweetById(Long id) {
         Optional<Tweet> requestedTweet = tweetRepository.findById(id);
         if(requestedTweet.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No tweet found with id: " + id);
         }
         return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToResponseDto(requestedTweet.get()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(int id) {
+    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(Long id) {
         Optional<Tweet> originalTweet = tweetRepository.findById(id);
         if(originalTweet.isEmpty() || originalTweet.get().isDeleted()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No tweet found with id: " + id);
         }
         List<TweetResponseDto> response = tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyTo(originalTweet.get(), Sort.by("posted").descending()));
         return new ResponseEntity<List<TweetResponseDto>>(response, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(int id) {
+    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id) {
+        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
+        if (requestedTweet.isEmpty()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        Set<User> mentionedUsers = requestedTweet.get().getMentions();
+        mentionedUsers.removeIf(User::isDeleted);
+        return ResponseEntity.ok(userMapper.entitiesToResponseDtos(List.copyOf(mentionedUsers)));
+    }
+
+    @Override
+    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(int id) {
+    public ResponseEntity<TweetResponseDto> repostTweet(Long id, CredentialsDto credentialsDto) {
         return null;
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> repostTweet(int id, CredentialsDto credentialsDto) {
+    public ResponseEntity<ContextDto> getContextOfTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<ContextDto> getContextOfTweet(int id) {
+    public ResponseEntity<UserResponseDto> getLikesOnTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<UserResponseDto> getLikesOnTweet(int id) {
+    public ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<HashtagDto> getHashtagsOnTweet(int id) {
+    public ResponseEntity<TweetResponseDto> deleteTweet(Long id, CredentialsDto credentialsDto) {
         return null;
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> deleteTweet(int id, CredentialsDto credentialsDto) {
-        return null;
-    }
-
-    @Override
-    public void likeTweet(int id, CredentialsDto credentialsDto) {
+    public void likeTweet(Long id, CredentialsDto credentialsDto) {
 
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> replyToTweet(int id, TweetRequestDto tweetRequestDto) {
+    public ResponseEntity<TweetResponseDto> replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
         return null;
     }
 

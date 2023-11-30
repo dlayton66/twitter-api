@@ -8,8 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TweetRepository extends JpaRepository<Tweet, Integer> {
+public interface TweetRepository extends JpaRepository<Tweet, Long> {
     List<Tweet> findByInReplyTo(Tweet parentTweet, Sort sort);
     List<Tweet> getByDeletedFalse(Sort sort);
-
 }

@@ -26,57 +26,57 @@ public class TweetController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TweetResponseDto> getTweetById(@PathVariable int id){
+    public ResponseEntity<TweetResponseDto> getTweetById(@PathVariable Long id){
         return tweetService.getTweetById(id);
     }
 
     @GetMapping("/{id}/replies")
-    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(@PathVariable int id){
+    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(@PathVariable Long id){
         return tweetService.getRepliesToTweet(id);
     }
 
     @GetMapping("/{id}/mentions")
-    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(@PathVariable int id){
+    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(@PathVariable Long id){
         return tweetService.getUsersMentionedInTweet(id);
     }
 
     @GetMapping("/{id}/reposts")
-    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(@PathVariable int id){
+    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(@PathVariable Long id){
         return tweetService.getRepostsOfTweet(id);
     }
 
     @PostMapping("/{id}/repost")
-    public ResponseEntity<TweetResponseDto> repostTweet(@PathVariable int id, @RequestBody CredentialsDto credentialsDto){
+    public ResponseEntity<TweetResponseDto> repostTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto){
         return tweetService.repostTweet(id, credentialsDto);
     }
 
     @GetMapping("/{id}/context")
-    public ResponseEntity<ContextDto> getContextOfTweet(@PathVariable int id){
+    public ResponseEntity<ContextDto> getContextOfTweet(@PathVariable Long id){
         return tweetService.getContextOfTweet(id);
     }
 
     @GetMapping("/{id}/likes")
-    public ResponseEntity<UserResponseDto> getLikesOnTweet(@PathVariable int id){
+    public ResponseEntity<UserResponseDto> getLikesOnTweet(@PathVariable Long id){
         return tweetService.getLikesOnTweet(id);
     }
 
     @GetMapping("/{id}/tags")
-    public ResponseEntity<HashtagDto> getHashtagsOnTweet(@PathVariable int id){
+    public ResponseEntity<HashtagDto> getHashtagsOnTweet(@PathVariable Long id){
         return tweetService.getHashtagsOnTweet(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<TweetResponseDto> deleteTweet(@PathVariable int id, @RequestBody CredentialsDto credentialsDto){
+    public ResponseEntity<TweetResponseDto> deleteTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto){
         return tweetService.deleteTweet(id, credentialsDto);
     }
 
     @PostMapping("/{id}/like")
-    public void likeTweet(@PathVariable int id, @RequestBody CredentialsDto credentialsDto){
+    public void likeTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto){
         tweetService.likeTweet(id, credentialsDto);
     }
 
     @PostMapping("/{id}/reply")
-    public ResponseEntity<TweetResponseDto> replyToTweet(@PathVariable int id, @RequestBody TweetRequestDto tweetRequestDto){
+    public ResponseEntity<TweetResponseDto> replyToTweet(@PathVariable Long id, @RequestBody TweetRequestDto tweetRequestDto){
         return tweetService.replyToTweet(id, tweetRequestDto);
     }
 }
