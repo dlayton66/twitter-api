@@ -50,20 +50,20 @@ public class Tweet {
           name = "tweet_hashtags",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
-  Set<Hashtag> hashtags  = new HashSet<>();
+  private Set<Hashtag> hashtags = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "user_likes",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  Set<User> likes  = new HashSet<>();
+  private Set<User> likes = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "user_mentions",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  Set<User> mentions  = new HashSet<>();;
+  private Set<User> mentions = new HashSet<>();
 
 }

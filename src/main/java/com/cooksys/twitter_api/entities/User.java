@@ -12,9 +12,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -24,7 +28,10 @@ import java.util.Set;
 @Table(name = "user_table")
 @Entity
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude = {"tweets", "likes", "mentions", "followers", "following"})
 public class User {
 
   @Id
@@ -52,19 +59,23 @@ public class User {
   })
   private Profile profile;
 
+  @OneToMany(mappedBy = "author")
+  private Set<Tweet> tweets = new HashSet<>();
+
   @ManyToMany(mappedBy = "likes")
-  Set<Tweet> likes  = new HashSet<>();
+  private Set<Tweet> likes = new HashSet<>();
 
   @ManyToMany(mappedBy = "mentions")
-  Set<Tweet> mentions = new HashSet<>();
+  private Set<Tweet> mentions = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "followers_following",
           joinColumns = @JoinColumn(name = "follower_id"),
           inverseJoinColumns = @JoinColumn(name = "following_id"))
-  Set<User> followers = new HashSet<>();
+  private Set<User> followers = new HashSet<>();
 
   @ManyToMany(mappedBy = "followers")
-  Set<User> following = new HashSet<>();
+  private Set<User> following = new HashSet<>();
+
 }
