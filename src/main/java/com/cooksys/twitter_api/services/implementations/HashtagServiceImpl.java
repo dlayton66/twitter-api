@@ -1,6 +1,9 @@
 package com.cooksys.twitter_api.services.implementations;
 
+import com.cooksys.twitter_api.controllers.HashtagController;
+import com.cooksys.twitter_api.dtos.HashtagDto;
 import com.cooksys.twitter_api.dtos.TweetResponseDto;
+
 
 import com.cooksys.twitter_api.repositories.TweetRepository;
 import com.cooksys.twitter_api.services.HashtagService;
@@ -29,9 +32,11 @@ public class HashtagServiceImpl implements HashtagService {
     private final TweetMapper tweetMapper;
 
 
+
+
     @Override
-    public List<String> getAllHashtags() {
-        return null;
+    public List<HashtagDto> getAllHashtags() {
+        return hashtagMapper.entitiesToDto(hashtagRepository.findAll());
     }
 
     @Override
