@@ -36,7 +36,7 @@ public class User {
 
   @Id
   @GeneratedValue
-  private Integer id;
+  private Long id;
 
   @CreationTimestamp
   @Column(nullable = false)
