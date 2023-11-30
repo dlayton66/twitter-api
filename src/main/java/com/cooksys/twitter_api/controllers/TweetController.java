@@ -77,6 +77,6 @@ public class TweetController {
 
     @PostMapping("/{id}/reply")
     public ResponseEntity<TweetResponseDto> replyToTweet(@PathVariable Long id, @RequestBody TweetRequestDto tweetRequestDto){
-        return tweetService.replyToTweet(id, tweetRequestDto);
+        return ResponseEntity.ok(tweetService.replyToTweet(id, tweetRequestDto));
     }
 }

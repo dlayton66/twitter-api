@@ -32,5 +32,5 @@ public interface TweetService {
 
     void likeTweet(Long id, CredentialsDto credentialsDto);
 
-    ResponseEntity<TweetResponseDto> replyToTweet(Long id, TweetRequestDto tweetRequestDto);
+    TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto);
 }

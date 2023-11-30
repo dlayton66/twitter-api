@@ -38,6 +38,17 @@ public class TweetServiceImpl implements TweetService {
     private final UserMapper userMapper;
 
 
+    User areCredentialsValid(CredentialsDto credentialsDto){
+        Optional<User> user = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
+        if(user.isEmpty()){throw new NotAuthorizedException();}
+        if(credentialsDto.getPassword().equals(user.get().getCredentials().getPassword())){
+            return user.get();
+        }
+        else {
+            throw new NotAuthorizedException();
+        }
+    }
+
     @Override
     public List<TweetResponseDto> getAllTweets() {
         List<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
@@ -46,17 +57,10 @@ public class TweetServiceImpl implements TweetService {
     @Override
     @Transactional
     public ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto) {
-        //TODO: Check Credentials using the validationService probably, instead of this way.
-        Optional<User> author = userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername());
-        if(author.isEmpty()){
-            throw new NotFoundException("No user found");
-        }
-        if(!tweetRequestDto.getCredentials().getPassword().equals(author.get().getCredentials().password)){
-            throw new NotAuthorizedException();
-        }
+        User author = areCredentialsValid(tweetRequestDto.getCredentials());
         // Map request to Entity.
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
-        newTweet.setAuthor(author.get());
+        newTweet.setAuthor(author);
 
         // Scan text for hashtags, such as #hashtags.
         String content = newTweet.getContent();
@@ -153,7 +157,7 @@ public class TweetServiceImpl implements TweetService {
         if(originalTweet.isEmpty() || originalTweet.get().isDeleted()){
             throw new NotFoundException("No tweet found with id: " + id);
         }
-        List<TweetResponseDto> response = tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyTo(originalTweet.get(), Sort.by("posted").descending()));
+        List<TweetResponseDto> response = tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyToAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending()));
         return new ResponseEntity<List<TweetResponseDto>>(response, HttpStatus.OK);
     }
 
@@ -205,8 +209,22 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
-        return null;
+    public TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
+        //credentials
+        User author = areCredentialsValid(tweetRequestDto.getCredentials());
+
+        Optional<Tweet> parentTweet = tweetRepository.findByIdAndDeletedFalse(id);
+        if (parentTweet.isEmpty()) {
+            throw new NotFoundException("Tweet is either deleted or never existed.");
+        }
+
+        Tweet newReplyTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
+        newReplyTweet.setAuthor(author);
+        newReplyTweet.setInReplyTo(parentTweet.get());
+        Tweet savedReplyTweet = tweetRepository.saveAndFlush(newReplyTweet);
+        parentTweet.get().getReplies().add(savedReplyTweet);
+        tweetRepository.saveAndFlush(parentTweet.get());
+        return tweetMapper.entityToResponseDto(savedReplyTweet);
     }
 
 
