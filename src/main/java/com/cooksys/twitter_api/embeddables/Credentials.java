@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class Credentials {
 
+  @Column(nullable = false, unique = true)
   public String username;
+
+  @Column(nullable = false)
   public String password;
 
 }
