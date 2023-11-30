@@ -4,8 +4,7 @@ import com.cooksys.twitter_api.dtos.*;
 import com.cooksys.twitter_api.entities.Hashtag;
 import com.cooksys.twitter_api.entities.Tweet;
 import com.cooksys.twitter_api.entities.User;
-import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
-import com.cooksys.twitter_api.mappers.HashtagMapper;
+import com.cooksys.twitter_api.exceptions.NotFoundException;
 import com.cooksys.twitter_api.mappers.TweetMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
 import com.cooksys.twitter_api.repositories.HashtagRepository;
@@ -15,7 +14,6 @@ import com.cooksys.twitter_api.services.TweetService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.binding.OptionalValueBinding;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +34,7 @@ public class TweetServiceImpl implements TweetService {
     private final HashtagRepository hashtagRepository;
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
 
     @Override
@@ -160,7 +158,12 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(int id) {
-        return null;
+        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
+        if (requestedTweet.isEmpty()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        return ResponseEntity.ok(userMapper.entitiesToResponseDtos(List.copyOf(requestedTweet.get().getMentions())));
     }
 
     @Override
