@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class UserResponseDto {
 
   public String username;
-  public Profile profile;
+  public ProfileDto profile;
   public Timestamp joined;
 
 }

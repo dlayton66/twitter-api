@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,7 +23,7 @@ public class Tweet {
 
   @Id
   @GeneratedValue
-  private Integer id;
+  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "author_id", nullable = false)
@@ -40,29 +41,35 @@ public class Tweet {
   @JoinColumn(name = "`inReplyTo_id`")
   private Tweet inReplyTo;
 
+  @OneToMany(mappedBy = "inReplyTo")
+  private List<Tweet> replies = new ArrayList<>();
+
   @ManyToOne
   @JoinColumn(name = "`repostOf_id`")
   private Tweet repostOf;
+
+  @OneToMany(mappedBy = "repostOf")
+  private List<Tweet> reposts = new ArrayList<>();
 
   @ManyToMany
   @JoinTable(
           name = "tweet_hashtags",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
-  Set<Hashtag> hashtags;
+  private Set<Hashtag> hashtags = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "user_likes",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  Set<User> likes;
+  private Set<User> likes = new HashSet<>();
 
   @ManyToMany
   @JoinTable(
           name = "user_mentions",
           joinColumns = @JoinColumn(name = "tweet_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  Set<User> mentions;
+  private Set<User> mentions = new HashSet<>();
 
 }
