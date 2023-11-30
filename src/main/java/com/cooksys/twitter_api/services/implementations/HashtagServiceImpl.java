@@ -15,10 +15,6 @@ public class HashtagServiceImpl implements HashtagService {
 
     private final TweetRepository tweetRepository;
 
-    public HashtagServiceImpl(TweetRepository tweetRepository) {
-        this.tweetRepository = tweetRepository;
-    }
-
     @Override
     public List<String> getAllHashtags() {
         return null;

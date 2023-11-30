@@ -15,11 +15,6 @@ public class ValidateController {
 
     private final ValidateService validateService;
 
-    @Autowired
-    public ValidateController(ValidateService validateService) {
-        this.validateService = validateService;
-    }
-
     @GetMapping("/tag/exists/{label}")
     public boolean validateTagExists(@PathVariable String label) {
         return validateService.tagExists(label);
