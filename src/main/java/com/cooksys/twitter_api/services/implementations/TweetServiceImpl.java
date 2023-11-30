@@ -12,7 +12,6 @@ import com.cooksys.twitter_api.repositories.HashtagRepository;
 import com.cooksys.twitter_api.repositories.TweetRepository;
 import com.cooksys.twitter_api.repositories.UserRepository;
 import com.cooksys.twitter_api.services.TweetService;
-import com.cooksys.twitter_api.utils.UserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -165,8 +164,9 @@ public class TweetServiceImpl implements TweetService {
             throw new NotFoundException("No tweet found with id: " + id);
         }
 
-        Set<User> filteredUsers = UserUtils.filterDeletedUsers(requestedTweet.get().getMentions());
-        return ResponseEntity.ok(userMapper.entitiesToResponseDtos(List.copyOf(filteredUsers)));
+        Set<User> mentionedUsers = requestedTweet.get().getMentions();
+        mentionedUsers.removeIf(User::isDeleted);
+        return ResponseEntity.ok(userMapper.entitiesToResponseDtos(List.copyOf(mentionedUsers)));
     }
 
     @Override
