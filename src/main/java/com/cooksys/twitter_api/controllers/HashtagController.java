@@ -16,10 +16,6 @@ public class HashtagController {
 
     private final HashtagService hashtagService;
 
-    public HashtagController(HashtagService hashtagService) {
-        this.hashtagService = hashtagService;
-    }
-
     @GetMapping
     public List<HashtagDto> getAllHashtags() {
         return hashtagService.getAllHashtags();
