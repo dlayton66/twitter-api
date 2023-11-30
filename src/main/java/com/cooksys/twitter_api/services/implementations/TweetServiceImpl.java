@@ -4,6 +4,7 @@ import com.cooksys.twitter_api.dtos.*;
 import com.cooksys.twitter_api.entities.Hashtag;
 import com.cooksys.twitter_api.entities.Tweet;
 import com.cooksys.twitter_api.entities.User;
+import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
 import com.cooksys.twitter_api.mappers.HashtagMapper;
 import com.cooksys.twitter_api.mappers.TweetMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
@@ -28,14 +29,12 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class TweetServiceImpl implements TweetService {
 
-    private TweetRepository tweetRepository;
-    private TweetMapper tweetMapper;
+    private final TweetRepository tweetRepository;
+    private final TweetMapper tweetMapper;
 
-    private HashtagRepository hashtagRepository;
+    private final HashtagRepository hashtagRepository;
 
-    private UserRepository userRepository;
-
-
+    private final UserRepository userRepository;
 
 
     @Override
@@ -45,10 +44,17 @@ public class TweetServiceImpl implements TweetService {
     @Override
     @Transactional
     public ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto) {
-        //TODO: Check Credentials, not sure how to do that yet.
-
+        //TODO: Check Credentials using the validationService probably, instead of this way.
+        Optional<User> author = userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername());
+        if(author.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(!tweetRequestDto.getCredentials().getPassword().equals(author.get().getCredentials().password)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         // Map request to Entity.
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
+        newTweet.setAuthor(author.get());
 
         // Scan text for hashtags, such as #hashtags.
         String content = newTweet.getContent();

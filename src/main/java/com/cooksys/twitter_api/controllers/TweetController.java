@@ -12,7 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/tweets")
 public class TweetController {
-    private TweetService tweetService;
+    private final TweetService tweetService;
+
 
     @GetMapping
     public List<TweetResponseDto> getAllTweets(){
