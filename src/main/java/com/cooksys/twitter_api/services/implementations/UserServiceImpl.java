@@ -15,7 +15,6 @@ import com.cooksys.twitter_api.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,8 +26,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CredentialsMapper credentialsMapper;
     private final ProfileMapper profileMapper;
-
-
 
     @Override
     public Set<UserResponseDto> getAllUsers() {

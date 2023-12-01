@@ -1,7 +1,6 @@
 package com.cooksys.twitter_api.services;
 
 import com.cooksys.twitter_api.dtos.*;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Set;
 
@@ -9,9 +8,9 @@ public interface TweetService {
 
     Set<TweetResponseDto> getAllTweets();
 
-    ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto);
+    TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
 
-    ResponseEntity<TweetResponseDto> getTweetById(Long id);
+    TweetResponseDto getTweetById(Long id);
 
     Set<TweetResponseDto> getRepliesToTweet(Long id);
 
@@ -21,7 +20,7 @@ public interface TweetService {
 
     TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto);
 
-    ResponseEntity<ContextDto> getContextOfTweet(Long id);
+    ContextDto getContextOfTweet(Long id);
 
     Set<UserResponseDto> getLikesOnTweet(Long id);
 
