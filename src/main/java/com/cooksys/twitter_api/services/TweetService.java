@@ -23,7 +23,7 @@ public interface TweetService {
 
     ResponseEntity<ContextDto> getContextOfTweet(Long id);
 
-    ResponseEntity<UserResponseDto> getLikesOnTweet(Long id);
+    Set<UserResponseDto> getLikesOnTweet(Long id);
 
     Set<HashtagDto> getHashtagsOnTweet(Long id);
 
