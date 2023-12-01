@@ -271,6 +271,7 @@ public class TweetServiceImpl implements TweetService {
         User user = areCredentialsValid(credentialsDto);
 
         likedTweet.get().getLikes().add(user);
+        tweetRepository.saveAndFlush(likedTweet.get());
     }
 
     @Override
