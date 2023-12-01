@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,7 +67,7 @@ public class TweetController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<TweetResponseDto> deleteTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto){
-        return tweetService.deleteTweet(id, credentialsDto);
+        return ResponseEntity.ok(tweetService.deleteTweet(id, credentialsDto));
     }
 
     @PostMapping("/{id}/like")

@@ -257,8 +257,16 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> deleteTweet(Long id, CredentialsDto credentialsDto) {
-        return null;
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Optional<Tweet> deletedTweet = tweetRepository.findById(id);
+        if (deletedTweet.isEmpty()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        User user = areCredentialsValid(credentialsDto);
+
+        deletedTweet.get().setDeleted(true);
+        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(deletedTweet.get()));
     }
 
     @Override
