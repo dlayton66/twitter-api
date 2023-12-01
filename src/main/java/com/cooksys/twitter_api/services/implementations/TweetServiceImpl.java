@@ -6,6 +6,7 @@ import com.cooksys.twitter_api.entities.Tweet;
 import com.cooksys.twitter_api.entities.User;
 import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
 import com.cooksys.twitter_api.exceptions.NotFoundException;
+import com.cooksys.twitter_api.mappers.HashtagMapper;
 import com.cooksys.twitter_api.mappers.TweetMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
 import com.cooksys.twitter_api.repositories.HashtagRepository;
@@ -19,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -34,6 +34,7 @@ public class TweetServiceImpl implements TweetService {
     private final TweetMapper tweetMapper;
 
     private final HashtagRepository hashtagRepository;
+    private final HashtagMapper hashtagMapper;
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -82,9 +83,9 @@ public class TweetServiceImpl implements TweetService {
             allHashtagStrings.add(hashtagMatcher.group());
         }
 
-        // Lists for new and existing hashtags.
-        List<Hashtag> newHashtagEntities = new ArrayList<>();
-        List<Hashtag> existingHashtags = new ArrayList<>();
+        // Sets for new and existing hashtags.
+        Set<Hashtag> newHashtagEntities = new HashSet<>();
+        Set<Hashtag> existingHashtags = new HashSet<>();
         for (String eachHashtag : allHashtagStrings) {
             // Check if they are already represented in the Repository,
             // and put them in one of the two lists.
@@ -138,7 +139,7 @@ public class TweetServiceImpl implements TweetService {
         while (mentionMatcher.find()) {
             mentionStrings.add(mentionMatcher.group(1));
         }
-        List<User> mentionedExistingUsers = new ArrayList<>();
+        Set<User> mentionedExistingUsers = new HashSet<>();
         for (String eachMention : mentionStrings) {
             Optional<User> mentionedUser = userRepository.findByCredentialsUsername(eachMention);
             if (mentionedUser.isPresent()) {
@@ -151,8 +152,8 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public List<TweetResponseDto> getAllTweets() {
-        List<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
+    public Set<TweetResponseDto> getAllTweets() {
+        Set<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
         return tweetMapper.entitiesToResponseDtos(tweets);
     }
 
@@ -188,7 +189,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public List<TweetResponseDto> getRepliesToTweet(Long id) {
+    public Set<TweetResponseDto> getRepliesToTweet(Long id) {
         Optional<Tweet> originalTweet = tweetRepository.findByIdAndDeletedFalse(id);
         if(originalTweet.isEmpty()){
             throw new NotFoundException("No tweet found with id: " + id);
@@ -197,19 +198,17 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id) {
-        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
-        if (requestedTweet.isEmpty()) {
+    public Set<UserResponseDto> getUsersMentionedInTweet(Long id) {
+        if (!tweetRepository.existsById(id)) {
             throw new NotFoundException("No tweet found with id: " + id);
         }
 
-        Set<User> mentionedUsers = requestedTweet.get().getMentions();
-        mentionedUsers.removeIf(User::isDeleted);
-        return ResponseEntity.ok(userMapper.entitiesToResponseDtos(List.copyOf(mentionedUsers)));
+        Set<User> mentionedUsers = userRepository.findUserByDeletedIsFalseAndMentionsId(id);
+        return userMapper.entitiesToResponseDtos(mentionedUsers);
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id) {
+    public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(Long id) {
         return null;
     }
 
@@ -236,7 +235,7 @@ public class TweetServiceImpl implements TweetService {
         repost.setAuthor(author);
         repost.setPosted(Timestamp.from(Instant.now()));
         repost.setInReplyTo(null);
-        repost.setReplies(new ArrayList<>());
+        repost.setReplies(new HashSet<>());
         repost.setContent(null);
 
         // Save the repost tweet and return its data.
@@ -255,18 +254,39 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id) {
-        return null;
+    public Set<HashtagDto> getHashtagsOnTweet(Long id) {
+        if (!tweetRepository.existsById(id)) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        Set<Hashtag> tweetHashtags= hashtagRepository.findHashtagsByTweetsId(id);
+        return hashtagMapper.entitiesToDto(tweetHashtags);
     }
 
     @Override
-    public ResponseEntity<TweetResponseDto> deleteTweet(Long id, CredentialsDto credentialsDto) {
-        return null;
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Optional<Tweet> deletedTweet = tweetRepository.findById(id);
+        if (deletedTweet.isEmpty()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        User user = areCredentialsValid(credentialsDto);
+
+        deletedTweet.get().setDeleted(true);
+        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(deletedTweet.get()));
     }
 
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
+        Optional<Tweet> likedTweet = tweetRepository.findById(id);
+        if (likedTweet.isEmpty() || likedTweet.get().isDeleted()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
 
+        User user = areCredentialsValid(credentialsDto);
+
+        likedTweet.get().getLikes().add(user);
+        tweetRepository.saveAndFlush(likedTweet.get());
     }
 
     @Override

@@ -239,7 +239,7 @@ public class Seeder implements CommandLineRunner {
         user3.setTweets(user3Tweets);
         userRepository.saveAndFlush(user3);
 
-        // ----- List of Liked Tweets -----
+        // ----- Set of Liked Tweets -----
         user1.setLikes(user3Tweets);
         userRepository.saveAndFlush(user1);
 
@@ -253,7 +253,7 @@ public class Seeder implements CommandLineRunner {
         deletedUser.setLikes(user2Tweets);
         userRepository.saveAndFlush(deletedUser);
 
-        // ----- List of Following -----
+        // ----- Set of Following -----
         Set<User> followingSet = Set.of(user2, user3, user4);
         user1.setFollowing(followingSet);
         userRepository.saveAndFlush(user1);

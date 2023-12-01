@@ -6,7 +6,7 @@ import com.cooksys.twitter_api.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring", uses = {ProfileMapper.class, CredentialsMapper.class})
 public interface UserMapper {
@@ -18,6 +18,5 @@ public interface UserMapper {
 
   User requestDtoToEntity(UserRequestDto userRequestDto);
 
-  List<UserResponseDto> entitiesToResponseDtos(List<User> users);
-
+  Set<UserResponseDto> entitiesToResponseDtos(Set<User> users);
 }

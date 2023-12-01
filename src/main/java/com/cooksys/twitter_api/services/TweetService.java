@@ -3,21 +3,21 @@ package com.cooksys.twitter_api.services;
 import com.cooksys.twitter_api.dtos.*;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+import java.util.Set;
 
 public interface TweetService {
 
-    List<TweetResponseDto> getAllTweets();
+    Set<TweetResponseDto> getAllTweets();
 
     ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto);
 
     ResponseEntity<TweetResponseDto> getTweetById(Long id);
 
-    List<TweetResponseDto> getRepliesToTweet(Long id);
+    Set<TweetResponseDto> getRepliesToTweet(Long id);
 
-    ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id);
+    Set<UserResponseDto> getUsersMentionedInTweet(Long id);
 
-    ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id);
+    ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(Long id);
 
     TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto);
 
@@ -25,12 +25,12 @@ public interface TweetService {
 
     ResponseEntity<UserResponseDto> getLikesOnTweet(Long id);
 
-    ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id);
+    Set<HashtagDto> getHashtagsOnTweet(Long id);
 
-
-    ResponseEntity<TweetResponseDto> deleteTweet(Long id, CredentialsDto credentialsDto);
+    TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto);
 
     void likeTweet(Long id, CredentialsDto credentialsDto);
 
     TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto);
+
 }
