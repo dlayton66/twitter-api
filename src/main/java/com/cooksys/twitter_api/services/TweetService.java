@@ -19,7 +19,7 @@ public interface TweetService {
 
     ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id);
 
-    ResponseEntity<TweetResponseDto> repostTweet(Long id, CredentialsDto credentialsDto);
+    TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto);
 
     ResponseEntity<ContextDto> getContextOfTweet(Long id);
 
@@ -32,5 +32,5 @@ public interface TweetService {
 
     void likeTweet(Long id, CredentialsDto credentialsDto);
 
-    ResponseEntity<TweetResponseDto> replyToTweet(Long id, TweetRequestDto tweetRequestDto);
+    TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto);
 }

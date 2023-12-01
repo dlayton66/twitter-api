@@ -42,6 +42,6 @@ public class HashtagServiceImpl implements HashtagService {
     @Override
     public ResponseEntity<List<TweetResponseDto>> getTweetsByHashtag(String label) {
         if(!hashtagRepository.existsHashtagByLabel(label)){return new ResponseEntity<>(HttpStatus.NOT_FOUND);}
-        return ResponseEntity.ok(tweetMapper.entitiesToResponseDtos(tweetRepository.findByHashtags_Label(label, Sort.by("posted").descending())));
+        return ResponseEntity.ok(tweetMapper.entitiesToResponseDtos(tweetRepository.findByHashtags_LabelAndDeletedFalse(label, Sort.by("posted").descending())));
     }
 }

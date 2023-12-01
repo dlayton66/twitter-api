@@ -47,7 +47,7 @@ public class TweetController {
 
     @PostMapping("/{id}/repost")
     public ResponseEntity<TweetResponseDto> repostTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto){
-        return tweetService.repostTweet(id, credentialsDto);
+        return ResponseEntity.ok(tweetService.repostTweet(id, credentialsDto));
     }
 
     @GetMapping("/{id}/context")
@@ -77,6 +77,6 @@ public class TweetController {
 
     @PostMapping("/{id}/reply")
     public ResponseEntity<TweetResponseDto> replyToTweet(@PathVariable Long id, @RequestBody TweetRequestDto tweetRequestDto){
-        return tweetService.replyToTweet(id, tweetRequestDto);
+        return ResponseEntity.ok(tweetService.replyToTweet(id, tweetRequestDto));
     }
 }
