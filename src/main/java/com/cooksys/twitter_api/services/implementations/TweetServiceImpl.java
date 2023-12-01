@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -257,7 +258,7 @@ public class TweetServiceImpl implements TweetService {
         if(tweet.isEmpty()){
             throw new NotFoundException("Tweet doesn't exist or was deleted.");
         }
-        return userMapper.entitiesToResponseDtos( tweet.get().getLikes());
+        return userMapper.entitiesToResponseDtos( tweet.get().getLikes().stream().filter(user -> !user.isDeleted()).collect(Collectors.toSet()));
     }
 
     @Override
