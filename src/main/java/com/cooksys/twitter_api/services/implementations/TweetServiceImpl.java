@@ -186,13 +186,12 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(Long id) {
-        Optional<Tweet> originalTweet = tweetRepository.findById(id);
-        if(originalTweet.isEmpty() || originalTweet.get().isDeleted()){
+    public List<TweetResponseDto> getRepliesToTweet(Long id) {
+        Optional<Tweet> originalTweet = tweetRepository.findByIdAndDeletedFalse(id);
+        if(originalTweet.isEmpty()){
             throw new NotFoundException("No tweet found with id: " + id);
         }
-        List<TweetResponseDto> response = tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyToAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending()));
-        return new ResponseEntity<List<TweetResponseDto>>(response, HttpStatus.OK);
+        return tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyToAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending()));
     }
 
     @Override
@@ -244,20 +243,30 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
-        //credentials
+        // Credentials validation
         User author = areCredentialsValid(tweetRequestDto.getCredentials());
 
+        // Find the parent tweet, handling the case where it might not exist.
         Optional<Tweet> parentTweet = tweetRepository.findByIdAndDeletedFalse(id);
         if (parentTweet.isEmpty()) {
             throw new NotFoundException("Tweet is either deleted or never existed.");
         }
 
+        // Map the request DTO to a new Tweet entity and set its properties.
         Tweet newReplyTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
         newReplyTweet.setAuthor(author);
         newReplyTweet.setInReplyTo(parentTweet.get());
+
+        // Process hashtags and mentions for the reply tweet.
+        processHashtags(newReplyTweet);
+        processMentions(newReplyTweet);
+
+        // Save the new reply tweet and update the parent tweet with the reply.
         Tweet savedReplyTweet = tweetRepository.saveAndFlush(newReplyTweet);
         parentTweet.get().getReplies().add(savedReplyTweet);
         tweetRepository.saveAndFlush(parentTweet.get());
+
+        // Convert the saved reply tweet to a DTO and return it.
         return tweetMapper.entityToResponseDto(savedReplyTweet);
     }
 

@@ -13,7 +13,7 @@ public interface TweetService {
 
     ResponseEntity<TweetResponseDto> getTweetById(Long id);
 
-    ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(Long id);
+    List<TweetResponseDto> getRepliesToTweet(Long id);
 
     ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id);
 
