@@ -56,8 +56,8 @@ public class TweetController {
     }
 
     @GetMapping("/{id}/likes")
-    public ResponseEntity<UserResponseDto> getLikesOnTweet(@PathVariable Long id){
-        return tweetService.getLikesOnTweet(id);
+    public ResponseEntity<Set<UserResponseDto>> getLikesOnTweet(@PathVariable Long id){
+        return ResponseEntity.ok(tweetService.getLikesOnTweet(id));
     }
 
     @GetMapping("/{id}/tags")

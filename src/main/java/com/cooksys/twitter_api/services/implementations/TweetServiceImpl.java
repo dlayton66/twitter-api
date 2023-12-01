@@ -249,8 +249,12 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<UserResponseDto> getLikesOnTweet(Long id) {
-        return null;
+    public Set<UserResponseDto> getLikesOnTweet(Long id) {
+        Optional<Tweet> tweet =  tweetRepository.findByIdAndDeletedFalse(id);
+        if(tweet.isEmpty()){
+            throw new NotFoundException("Tweet doesn't exist or was deleted.");
+        }
+        return userMapper.entitiesToResponseDtos( tweet.get().getLikes());
     }
 
     @Override
