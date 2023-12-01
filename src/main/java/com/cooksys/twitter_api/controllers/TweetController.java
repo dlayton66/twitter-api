@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Set;
 
 @RestController
@@ -16,18 +17,20 @@ public class TweetController {
 
 
     @GetMapping
-    public Set<TweetResponseDto> getAllTweets(){
-        return tweetService.getAllTweets();
+    public ResponseEntity<Set<TweetResponseDto>> getAllTweets(){
+        return ResponseEntity.ok(tweetService.getAllTweets());
     }
 
     @PostMapping
     public ResponseEntity<TweetResponseDto> createTweet(@RequestBody TweetRequestDto tweetRequestDto){
-        return tweetService.createTweet(tweetRequestDto);
+        return ResponseEntity
+                .created(URI.create(""))
+                .body(tweetService.createTweet(tweetRequestDto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TweetResponseDto> getTweetById(@PathVariable Long id){
-        return tweetService.getTweetById(id);
+        return ResponseEntity.ok(tweetService.getTweetById(id));
     }
 
     @GetMapping("/{id}/replies")
@@ -42,7 +45,7 @@ public class TweetController {
 
     @GetMapping("/{id}/reposts")
     public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(@PathVariable Long id){
-        return tweetService.getRepostsOfTweet(id);
+        return ResponseEntity.ok(tweetService.getRepostsOfTweet(id));
     }
 
     @PostMapping("/{id}/repost")
@@ -52,12 +55,12 @@ public class TweetController {
 
     @GetMapping("/{id}/context")
     public ResponseEntity<ContextDto> getContextOfTweet(@PathVariable Long id){
-        return tweetService.getContextOfTweet(id);
+        return ResponseEntity.ok(tweetService.getContextOfTweet(id));
     }
 
     @GetMapping("/{id}/likes")
     public ResponseEntity<UserResponseDto> getLikesOnTweet(@PathVariable Long id){
-        return tweetService.getLikesOnTweet(id);
+        return ResponseEntity.ok(tweetService.getLikesOnTweet(id));
     }
 
     @GetMapping("/{id}/tags")

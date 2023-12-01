@@ -16,13 +16,13 @@ import com.cooksys.twitter_api.services.TweetService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +39,7 @@ public class TweetServiceImpl implements TweetService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    // helper methods
 
     User areCredentialsValid(CredentialsDto credentialsDto){
         if(credentialsDto == null ){throw  new NotAuthorizedException("Credentials are required.");}
@@ -151,6 +152,8 @@ public class TweetServiceImpl implements TweetService {
         userRepository.saveAllAndFlush(mentionedExistingUsers);
     }
 
+    // endpoints
+
     @Override
     public Set<TweetResponseDto> getAllTweets() {
         Set<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
@@ -159,7 +162,7 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     @Transactional
-    public ResponseEntity<TweetResponseDto> createTweet(TweetRequestDto tweetRequestDto) {
+    public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
         User author = areCredentialsValid(tweetRequestDto.getCredentials());
         // Map request to Entity.
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
@@ -174,18 +177,16 @@ public class TweetServiceImpl implements TweetService {
         processMentions(newTweet);
 
         // Save the tweet with all relationships set, then return it.
-        TweetResponseDto response = tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(newTweet));
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(newTweet));
     }
 
-
     @Override
-    public ResponseEntity<TweetResponseDto> getTweetById(Long id) {
+    public TweetResponseDto getTweetById(Long id) {
         Optional<Tweet> requestedTweet = tweetRepository.findById(id);
         if(requestedTweet.isEmpty()){
             throw new NotFoundException("No tweet found with id: " + id);
         }
-        return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToResponseDto(requestedTweet.get()), HttpStatus.OK);
+        return tweetMapper.entityToResponseDto(requestedTweet.get());
     }
 
     @Override
@@ -208,7 +209,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(Long id) {
+    public Set<TweetResponseDto> getRepostsOfTweet(Long id) {
         return null;
     }
 
@@ -244,12 +245,12 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<ContextDto> getContextOfTweet(Long id) {
+    public ContextDto getContextOfTweet(Long id) {
         return null;
     }
 
     @Override
-    public ResponseEntity<UserResponseDto> getLikesOnTweet(Long id) {
+    public UserResponseDto getLikesOnTweet(Long id) {
         return null;
     }
 
