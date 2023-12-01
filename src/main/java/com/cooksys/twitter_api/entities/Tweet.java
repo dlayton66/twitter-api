@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Set;
 
 @Entity
@@ -37,14 +37,14 @@ public class Tweet {
   private Tweet inReplyTo;
 
   @OneToMany(mappedBy = "inReplyTo")
-  private List<Tweet> replies = new ArrayList<>();
+  private Set<Tweet> replies = new HashSet<>();
 
   @ManyToOne
   @JoinColumn(name = "`repostOf_id`")
   private Tweet repostOf;
 
   @OneToMany(mappedBy = "repostOf")
-  private List<Tweet> reposts = new ArrayList<>();
+  private Set<Tweet> reposts = new HashSet<>();
 
   @ManyToMany
   @JoinTable(

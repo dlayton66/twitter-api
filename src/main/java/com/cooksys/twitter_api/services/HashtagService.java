@@ -4,11 +4,11 @@ import com.cooksys.twitter_api.dtos.HashtagDto;
 import com.cooksys.twitter_api.dtos.TweetResponseDto;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+import java.util.Set;
 
 public interface HashtagService {
 
-    List<HashtagDto> getAllHashtags();
+    Set<HashtagDto> getAllHashtags();
 
-    ResponseEntity<List<TweetResponseDto>> getTweetsByHashtag(String label);
+    ResponseEntity<Set<TweetResponseDto>> getTweetsByHashtag(String label);
 }

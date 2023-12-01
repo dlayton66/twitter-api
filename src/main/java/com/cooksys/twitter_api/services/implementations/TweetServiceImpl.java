@@ -81,9 +81,9 @@ public class TweetServiceImpl implements TweetService {
             allHashtagStrings.add(hashtagMatcher.group());
         }
 
-        // Lists for new and existing hashtags.
-        List<Hashtag> newHashtagEntities = new ArrayList<>();
-        List<Hashtag> existingHashtags = new ArrayList<>();
+        // Sets for new and existing hashtags.
+        Set<Hashtag> newHashtagEntities = new HashSet<>();
+        Set<Hashtag> existingHashtags = new HashSet<>();
         for (String eachHashtag : allHashtagStrings) {
             // Check if they are already represented in the Repository,
             // and put them in one of the two lists.
@@ -137,7 +137,7 @@ public class TweetServiceImpl implements TweetService {
         while (mentionMatcher.find()) {
             mentionStrings.add(mentionMatcher.group(1));
         }
-        List<User> mentionedExistingUsers = new ArrayList<>();
+        Set<User> mentionedExistingUsers = new HashSet<>();
         for (String eachMention : mentionStrings) {
             Optional<User> mentionedUser = userRepository.findByCredentialsUsername(eachMention);
             if (mentionedUser.isPresent()) {
@@ -150,8 +150,8 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public List<TweetResponseDto> getAllTweets() {
-        List<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
+    public Set<TweetResponseDto> getAllTweets() {
+        Set<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
         return tweetMapper.entitiesToResponseDtos(tweets);
     }
 
@@ -187,7 +187,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public List<TweetResponseDto> getRepliesToTweet(Long id) {
+    public Set<TweetResponseDto> getRepliesToTweet(Long id) {
         Optional<Tweet> originalTweet = tweetRepository.findByIdAndDeletedFalse(id);
         if(originalTweet.isEmpty()){
             throw new NotFoundException("No tweet found with id: " + id);
@@ -206,7 +206,7 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id) {
+    public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(Long id) {
         return null;
     }
 
@@ -233,7 +233,7 @@ public class TweetServiceImpl implements TweetService {
         repost.setAuthor(author);
         repost.setPosted(Timestamp.from(Instant.now()));
         repost.setInReplyTo(null);
-        repost.setReplies(new ArrayList<>());
+        repost.setReplies(new HashSet<>());
         repost.setContent(null);
 
         // Save the repost tweet and return its data.

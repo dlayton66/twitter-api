@@ -1,13 +1,15 @@
 package com.cooksys.twitter_api.controllers;
 
-import com.cooksys.twitter_api.dtos.*;
+import com.cooksys.twitter_api.dtos.CredentialsDto;
+import com.cooksys.twitter_api.dtos.TweetResponseDto;
+import com.cooksys.twitter_api.dtos.UserRequestDto;
+import com.cooksys.twitter_api.dtos.UserResponseDto;
 import com.cooksys.twitter_api.services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -18,7 +20,7 @@ public class UserController {
 
 
     @GetMapping
-    public List<UserResponseDto> getAllUsers() {
+    public Set<UserResponseDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -56,27 +58,27 @@ public class UserController {
     }
 
     @GetMapping("/{username}/feed")
-    public List<TweetResponseDto> getUserFeed(@PathVariable String username) {
+    public Set<TweetResponseDto> getUserFeed(@PathVariable String username) {
         return userService.getUserFeed(username);
     }
 
     @GetMapping("/{username}/tweets")
-    public List<TweetResponseDto> getUserTweets(@PathVariable String username) {
+    public Set<TweetResponseDto> getUserTweets(@PathVariable String username) {
         return userService.getUserTweets(username);
     }
 
     @GetMapping("/{username}/mentions")
-    public ResponseEntity<List<TweetResponseDto>> getMentions(@PathVariable String username) {
+    public ResponseEntity<Set<TweetResponseDto>> getMentions(@PathVariable String username) {
         return ResponseEntity.ok(userService.getMentions(username));
     }
 
     @GetMapping("/{username}/followers")
-    public ResponseEntity<List<UserResponseDto>> getFollowers(@PathVariable String username) {
+    public ResponseEntity<Set<UserResponseDto>> getFollowers(@PathVariable String username) {
         return ResponseEntity.ok(userService.getFollowers(username));
     }
 
     @GetMapping("/{username}/following")
-    public ResponseEntity<List<UserResponseDto>> getFollowing(@PathVariable String username) {
+    public ResponseEntity<Set<UserResponseDto>> getFollowing(@PathVariable String username) {
         return ResponseEntity.ok(userService.getFollowing(username));
     }
 

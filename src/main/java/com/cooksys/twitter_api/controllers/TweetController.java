@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 import java.util.Set;
 
 @RestController
@@ -17,7 +17,7 @@ public class TweetController {
 
 
     @GetMapping
-    public List<TweetResponseDto> getAllTweets(){
+    public Set<TweetResponseDto> getAllTweets(){
         return tweetService.getAllTweets();
     }
 
@@ -32,7 +32,7 @@ public class TweetController {
     }
 
     @GetMapping("/{id}/replies")
-    public ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(@PathVariable Long id){
+    public ResponseEntity<Set<TweetResponseDto>> getRepliesToTweet(@PathVariable Long id){
         return ResponseEntity.ok(tweetService.getRepliesToTweet(id));
     }
 
@@ -42,7 +42,7 @@ public class TweetController {
     }
 
     @GetMapping("/{id}/reposts")
-    public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(@PathVariable Long id){
+    public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(@PathVariable Long id){
         return tweetService.getRepostsOfTweet(id);
     }
 

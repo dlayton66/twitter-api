@@ -1,6 +1,9 @@
 package com.cooksys.twitter_api.services.implementations;
 
-import com.cooksys.twitter_api.dtos.*;
+import com.cooksys.twitter_api.dtos.CredentialsDto;
+import com.cooksys.twitter_api.dtos.ProfileDto;
+import com.cooksys.twitter_api.dtos.TweetResponseDto;
+import com.cooksys.twitter_api.dtos.UserResponseDto;
 import com.cooksys.twitter_api.entities.User;
 import com.cooksys.twitter_api.exceptions.BadRequestException;
 import com.cooksys.twitter_api.exceptions.NotFoundException;
@@ -9,12 +12,12 @@ import com.cooksys.twitter_api.mappers.ProfileMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
 import com.cooksys.twitter_api.repositories.UserRepository;
 import com.cooksys.twitter_api.services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
 import java.util.Optional;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +31,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
-        Optional<List<User>> nondeletedUsers = userRepository.getUsersByDeletedIsFalse();
+    public Set<UserResponseDto> getAllUsers() {
+        Optional<Set<User>> nondeletedUsers = userRepository.getUsersByDeletedIsFalse();
         if(nondeletedUsers.isPresent()) {return userMapper.entitiesToResponseDtos(nondeletedUsers.get());}
         throw new NotFoundException("Error finding all (non-deleted) users.");
     }
@@ -91,27 +94,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<TweetResponseDto> getUserFeed(String username) {
+    public Set<TweetResponseDto> getUserFeed(String username) {
         return null;
     }
 
     @Override
-    public List<TweetResponseDto> getUserTweets(String username) {
+    public Set<TweetResponseDto> getUserTweets(String username) {
         return null;
     }
 
     @Override
-    public List<TweetResponseDto> getMentions(String username) {
+    public Set<TweetResponseDto> getMentions(String username) {
         return null;
     }
 
     @Override
-    public List<UserResponseDto> getFollowers(String username) {
+    public Set<UserResponseDto> getFollowers(String username) {
         return null;
     }
 
     @Override
-    public List<UserResponseDto> getFollowing(String username) {
+    public Set<UserResponseDto> getFollowing(String username) {
         return null;
     }
 
