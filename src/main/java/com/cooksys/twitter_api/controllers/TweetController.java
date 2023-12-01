@@ -42,7 +42,7 @@ public class TweetController {
 
     @GetMapping("/{id}/reposts")
     public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(@PathVariable Long id){
-        return tweetService.getRepostsOfTweet(id);
+        return ResponseEntity.ok(tweetService.getRepostsOfTweet(id));
     }
 
     @PostMapping("/{id}/repost")

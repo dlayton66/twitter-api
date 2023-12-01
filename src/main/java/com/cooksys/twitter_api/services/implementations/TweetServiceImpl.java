@@ -208,8 +208,12 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(Long id) {
-        return null;
+    public Set<TweetResponseDto> getRepostsOfTweet(Long id) {
+        Optional<Tweet> originalTweet= tweetRepository.findByIdAndDeletedFalse(id);
+        if(originalTweet.isEmpty()){throw new NotFoundException("Original tweet doesn't exist or was deleted.");}
+        Optional<Set<Tweet>> reposts = tweetRepository.findByRepostOfAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending());
+        if (reposts.isEmpty()){return new HashSet<TweetResponseDto>();}
+        return tweetMapper.entitiesToResponseDtos(reposts.get());
     }
 
     @Override
