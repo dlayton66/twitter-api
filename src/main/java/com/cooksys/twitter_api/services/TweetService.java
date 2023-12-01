@@ -22,7 +22,7 @@ public interface TweetService {
 
     ContextDto getContextOfTweet(Long id);
 
-    UserResponseDto getLikesOnTweet(Long id);
+    Set<UserResponseDto> getLikesOnTweet(Long id);
 
     Set<HashtagDto> getHashtagsOnTweet(Long id);
 

@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -210,7 +208,11 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public Set<TweetResponseDto> getRepostsOfTweet(Long id) {
-        return null;
+        Optional<Tweet> originalTweet= tweetRepository.findByIdAndDeletedFalse(id);
+        if(originalTweet.isEmpty()){throw new NotFoundException("Original tweet doesn't exist or was deleted.");}
+        Optional<Set<Tweet>> reposts = tweetRepository.findByRepostOfAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending());
+        if (reposts.isEmpty()){return new HashSet<TweetResponseDto>();}
+        return tweetMapper.entitiesToResponseDtos(reposts.get());
     }
 
     @Override
@@ -250,8 +252,12 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public UserResponseDto getLikesOnTweet(Long id) {
-        return null;
+    public Set<UserResponseDto> getLikesOnTweet(Long id) {
+        Optional<Tweet> tweet =  tweetRepository.findByIdAndDeletedFalse(id);
+        if(tweet.isEmpty()){
+            throw new NotFoundException("Tweet doesn't exist or was deleted.");
+        }
+        return userMapper.entitiesToResponseDtos( tweet.get().getLikes());
     }
 
     @Override
