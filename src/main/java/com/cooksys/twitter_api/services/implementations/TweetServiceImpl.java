@@ -6,6 +6,7 @@ import com.cooksys.twitter_api.entities.Tweet;
 import com.cooksys.twitter_api.entities.User;
 import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
 import com.cooksys.twitter_api.exceptions.NotFoundException;
+import com.cooksys.twitter_api.mappers.HashtagMapper;
 import com.cooksys.twitter_api.mappers.TweetMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
 import com.cooksys.twitter_api.repositories.HashtagRepository;
@@ -33,6 +34,7 @@ public class TweetServiceImpl implements TweetService {
     private final TweetMapper tweetMapper;
 
     private final HashtagRepository hashtagRepository;
+    private final HashtagMapper hashtagMapper;
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -252,8 +254,13 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id) {
-        return null;
+    public Set<HashtagDto> getHashtagsOnTweet(Long id) {
+        if (!tweetRepository.existsById(id)) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        Set<Hashtag> tweetHashtags= hashtagRepository.findHashtagsByTweetsId(id);
+        return hashtagMapper.entitiesToDto(tweetHashtags);
     }
 
     @Override

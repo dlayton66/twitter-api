@@ -61,8 +61,8 @@ public class TweetController {
     }
 
     @GetMapping("/{id}/tags")
-    public ResponseEntity<HashtagDto> getHashtagsOnTweet(@PathVariable Long id){
-        return tweetService.getHashtagsOnTweet(id);
+    public ResponseEntity<Set<HashtagDto>> getHashtagsOnTweet(@PathVariable Long id){
+        return ResponseEntity.ok(tweetService.getHashtagsOnTweet(id));
     }
 
     @DeleteMapping("/{id}")

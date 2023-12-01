@@ -25,7 +25,7 @@ public interface TweetService {
 
     ResponseEntity<UserResponseDto> getLikesOnTweet(Long id);
 
-    ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id);
+    Set<HashtagDto> getHashtagsOnTweet(Long id);
 
     TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto);
 
