@@ -1,36 +1,33 @@
 package com.cooksys.twitter_api.services;
 
-import com.cooksys.twitter_api.dtos.CredentialsDto;
-import com.cooksys.twitter_api.dtos.ProfileDto;
-import com.cooksys.twitter_api.dtos.TweetRequestDto;
-import com.cooksys.twitter_api.dtos.UserRequestDto;
+import com.cooksys.twitter_api.dtos.*;
 
 import java.util.List;
 
 public interface UserService {
 
-    List<UserRequestDto> getAllUsers();
+    List<UserResponseDto> getAllUsers();
 
-    UserRequestDto createUser(CredentialsDto credentials, ProfileDto profile);
+    UserResponseDto createUser(CredentialsDto credentials, ProfileDto profile);
 
-    UserRequestDto getUserByUsername(String username);
+    UserResponseDto getUserByUsername(String username);
 
-    UserRequestDto updateUserProfile(String username, CredentialsDto credentials, ProfileDto profile);
+    UserResponseDto updateUserProfile(String username, CredentialsDto credentials, ProfileDto profile);
 
-    UserRequestDto deleteUser(String username, CredentialsDto credentials);
+    UserResponseDto deleteUser(String username, CredentialsDto credentials);
 
     void followUser(String username, CredentialsDto credentials);
 
     void unfollowUser(String username, CredentialsDto credentials);
 
-    List<TweetRequestDto> getUserFeed(String username);
+    List<TweetResponseDto> getUserFeed(String username);
 
-    List<TweetRequestDto> getUserTweets(String username);
+    List<TweetResponseDto> getUserTweets(String username);
 
-    List<TweetRequestDto> getMentions(String username);
+    List<TweetResponseDto> getMentions(String username);
 
-    List<UserRequestDto> getFollowers(String username);
+    List<UserResponseDto> getFollowers(String username);
 
-    List<UserRequestDto> getFollowing(String username);
+    List<UserResponseDto> getFollowing(String username);
 
 }

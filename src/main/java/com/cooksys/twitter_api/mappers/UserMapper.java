@@ -14,6 +14,8 @@ public interface UserMapper {
   @Mapping(target = "username", source = "credentials.username")
   UserResponseDto entityToResponseDto(User user);
 
+  UserRequestDto entityToRequestDto(User user);
+
   User requestDtoToEntity(UserRequestDto userRequestDto);
 
   Set<UserResponseDto> entitiesToResponseDtos(Set<User> users);
