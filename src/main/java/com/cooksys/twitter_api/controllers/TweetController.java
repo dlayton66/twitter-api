@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class TweetController {
     }
 
     @GetMapping("/{id}/mentions")
-    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(@PathVariable Long id){
-        return tweetService.getUsersMentionedInTweet(id);
+    public ResponseEntity<Set<UserResponseDto>> getUsersMentionedInTweet(@PathVariable Long id){
+        return ResponseEntity.ok(tweetService.getUsersMentionedInTweet(id));
     }
 
     @GetMapping("/{id}/reposts")

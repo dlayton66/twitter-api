@@ -158,15 +158,13 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    public ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id) {
-        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
-        if (requestedTweet.isEmpty()) {
+    public Set<UserResponseDto> getUsersMentionedInTweet(Long id) {
+        if (!tweetRepository.existsById(id)) {
             throw new NotFoundException("No tweet found with id: " + id);
         }
 
-        Set<User> mentionedUsers = requestedTweet.get().getMentions();
-        mentionedUsers.removeIf(User::isDeleted);
-        return ResponseEntity.ok(userMapper.entitiesToResponseDtos(List.copyOf(mentionedUsers)));
+        Set<User> mentionedUsers = userRepository.findUserByDeletedIsFalseAndMentionsId(id);
+        return userMapper.entitiesToResponseDtos(mentionedUsers);
     }
 
     @Override

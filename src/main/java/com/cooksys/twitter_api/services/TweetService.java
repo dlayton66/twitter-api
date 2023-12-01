@@ -4,6 +4,7 @@ import com.cooksys.twitter_api.dtos.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TweetService {
 
@@ -15,7 +16,7 @@ public interface TweetService {
 
     ResponseEntity<List<TweetResponseDto>> getRepliesToTweet(Long id);
 
-    ResponseEntity<List<UserResponseDto>> getUsersMentionedInTweet(Long id);
+    Set<UserResponseDto> getUsersMentionedInTweet(Long id);
 
     ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Long id);
 
@@ -27,10 +28,10 @@ public interface TweetService {
 
     ResponseEntity<HashtagDto> getHashtagsOnTweet(Long id);
 
-
     ResponseEntity<TweetResponseDto> deleteTweet(Long id, CredentialsDto credentialsDto);
 
     void likeTweet(Long id, CredentialsDto credentialsDto);
 
     ResponseEntity<TweetResponseDto> replyToTweet(Long id, TweetRequestDto tweetRequestDto);
+
 }
