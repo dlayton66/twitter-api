@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -264,7 +263,14 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public void likeTweet(Long id, CredentialsDto credentialsDto) {
+        Optional<Tweet> likedTweet = tweetRepository.findById(id);
+        if (likedTweet.isEmpty() || likedTweet.get().isDeleted()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
 
+        User user = areCredentialsValid(credentialsDto);
+
+        likedTweet.get().getLikes().add(user);
     }
 
     @Override
