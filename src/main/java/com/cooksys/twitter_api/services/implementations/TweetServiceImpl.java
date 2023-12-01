@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -39,13 +40,14 @@ public class TweetServiceImpl implements TweetService {
 
 
     User areCredentialsValid(CredentialsDto credentialsDto){
+        if(credentialsDto == null ){throw  new NotAuthorizedException("Credentials are required.");}
         Optional<User> user = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
         if(user.isEmpty()){throw new NotAuthorizedException();}
         if(credentialsDto.getPassword().equals(user.get().getCredentials().getPassword())){
             return user.get();
         }
         else {
-            throw new NotAuthorizedException();
+            throw new NotAuthorizedException("Credentials are invalid.");
         }
     }
 
@@ -213,7 +215,33 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
-        return null;
+        User author = areCredentialsValid(credentialsDto);
+
+        // Retrieve the original tweet or repost.
+        Optional<Tweet> tweetToRepost = tweetRepository.findByIdAndDeletedFalse(id);
+        if (tweetToRepost.isEmpty()) {
+            throw new NotFoundException("Tweet being reposted doesn't exist");
+        }
+
+        // Trace back to the original tweet if it's a repost.
+        Tweet originalTweet = tweetToRepost.get();
+        while (originalTweet.getRepostOf() != null) {
+            originalTweet = originalTweet.getRepostOf();
+        }
+
+        // Create a new tweet as a repost of the original tweet.
+        Tweet repost = new Tweet();
+        repost.setRepostOf(originalTweet);
+        repost.setDeleted(false);
+        repost.setAuthor(author);
+        repost.setPosted(Timestamp.from(Instant.now()));
+        repost.setInReplyTo(null);
+        repost.setReplies(new ArrayList<>());
+        repost.setContent(null);
+
+        // Save the repost tweet and return its data.
+        Tweet savedRepost = tweetRepository.saveAndFlush(repost);
+        return tweetMapper.entityToResponseDto(savedRepost);
     }
 
     @Override

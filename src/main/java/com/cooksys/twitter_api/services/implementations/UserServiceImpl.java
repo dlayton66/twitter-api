@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(CredentialsDto credentials, ProfileDto profile) {
+        if(credentials == null || profile == null){throw new BadRequestException("Credentials and Profile are required.");}
         String desiredUsername = credentials.getUsername();
         String password = credentials.getPassword();
         String email = profile.getEmail();
