@@ -17,7 +17,7 @@ public interface TweetService {
 
     Set<UserResponseDto> getUsersMentionedInTweet(Long id);
 
-    ResponseEntity<Set<TweetResponseDto>> getRepostsOfTweet(Long id);
+    Set<TweetResponseDto> getRepostsOfTweet(Long id);
 
     TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto);
 

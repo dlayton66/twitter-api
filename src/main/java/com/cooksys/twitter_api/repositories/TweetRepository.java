@@ -15,5 +15,5 @@ public interface TweetRepository extends JpaRepository<Tweet, Long> {
     Set<Tweet> getByDeletedFalse(Sort sort);
     Set<Tweet> findByHashtags_LabelAndDeletedFalse(String hashtagLabel, Sort sort);
     Optional<Tweet> findByIdAndDeletedFalse(Long id);
-
+    Optional<Set<Tweet>> findByRepostOfAndDeletedFalse(Tweet tweet, Sort sort);
 }
