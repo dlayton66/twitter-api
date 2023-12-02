@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         if(desiredUsername == null || password == null || email == null){
             throw new BadRequestException("Username, password, and email are required.");
         }
-        Optional<User> possibleUser = userRepository.findByCredentialsUsername(desiredUsername);
+        Optional<User> possibleUser = userRepository.findByCredentialsUsernameAndDeletedFalse(desiredUsername);
         if(possibleUser.isEmpty()){
             User newUser = new User();
             newUser.setCredentials(credentialsMapper.dtoToEntity(credentials));

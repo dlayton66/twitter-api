@@ -42,7 +42,7 @@ public class TweetServiceImpl implements TweetService {
 
     User areCredentialsValid(CredentialsDto credentialsDto){
         if(credentialsDto == null ){throw  new NotAuthorizedException("Credentials are required.");}
-        Optional<User> user = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
+        Optional<User> user = userRepository.findByCredentialsUsernameAndDeletedFalse(credentialsDto.getUsername());
         if(user.isEmpty()){throw new NotAuthorizedException();}
         if(credentialsDto.getPassword().equals(user.get().getCredentials().getPassword())){
             return user.get();
@@ -141,7 +141,7 @@ public class TweetServiceImpl implements TweetService {
         }
         Set<User> mentionedExistingUsers = new HashSet<>();
         for (String eachMention : mentionStrings) {
-            Optional<User> mentionedUser = userRepository.findByCredentialsUsername(eachMention);
+            Optional<User> mentionedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(eachMention);
             if (mentionedUser.isPresent()) {
                 tweet.getMentions().add(mentionedUser.get());
                 mentionedUser.get().getMentions().add(tweet);
