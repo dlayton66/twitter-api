@@ -74,6 +74,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUserProfile(String username, CredentialsDto credentials, ProfileDto profile) {
+        if(username == null || credentials == null || profile == null){throw new BadRequestException("Credentials and Profile are required.");}
 
         Optional<User> existingUser = userRepository.findByCredentialsUsername(username);
         if (existingUser.isEmpty()) {
@@ -94,6 +95,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto deleteUser(String username, CredentialsDto credentials) {
+        if(username == null || credentials == null){throw new BadRequestException("Credentials and Profile are required.");}
 
         Optional<User> authenticatedUser = userRepository.findByCredentialsUsername(username);
 
@@ -118,13 +120,44 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void followUser(String username, CredentialsDto credentials) {
+    public void followUser(String followerUsername, CredentialsDto credentials) {
+        if(followerUsername == null || credentials == null){throw new BadRequestException("Credentials and Profile are required.");}
 
+        // Find the user who is being followed
+        Optional<User> userToBeFollowedOptional = userRepository.findByCredentialsUsername(followerUsername);
+        if (userToBeFollowedOptional.isEmpty()) throw new NotFoundException("No user found with username: " + followerUsername);
+
+        User userToBeFollowed = userToBeFollowedOptional.get();
+        // Find the follower
+        Optional<User> followerOptional = userRepository.findByCredentialsUsername(credentials.getUsername());
+        if (followerOptional.isEmpty()) throw new NotFoundException("Follower not found with username: " + credentials.getUsername());
+
+        User follower = followerOptional.get();
+        // Add the follower to the user's followers
+        userToBeFollowed.getFollowers().add(follower);
+
+        userRepository.save(userToBeFollowed);
     }
+
 
     @Override
     public void unfollowUser(String username, CredentialsDto credentials) {
+        if(username == null || credentials == null){throw new BadRequestException("Credentials and Profile are required.");}
 
+        // Find the user who is being unfollowed
+        Optional<User> userToBeUnfollowedOptional = userRepository.findByCredentialsUsername(username);
+        if (userToBeUnfollowedOptional.isEmpty()) throw new NotFoundException("No user found with username: " + username);
+
+        User userToBeUnfollowed = userToBeUnfollowedOptional.get();
+        // Find the follower
+        Optional<User> unFollowerOptional = userRepository.findByCredentialsUsername(credentials.getUsername());
+        if (unFollowerOptional.isEmpty()) throw new NotFoundException("Follower not found with username: " + credentials.getUsername());
+
+        User unFollower = unFollowerOptional.get();
+        // Remove the follower to the user's followers
+        userToBeUnfollowed.getFollowers().remove(unFollower);
+
+        userRepository.save(userToBeUnfollowed);
     }
 
     @Override
