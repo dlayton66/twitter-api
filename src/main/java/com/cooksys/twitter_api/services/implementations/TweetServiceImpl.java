@@ -135,17 +135,19 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public ContextDto getTweetContext(Long id) {
-        if (!tweetRepository.existsById(id)) {
+        Optional<Tweet> optionalTweet = tweetRepository.findById(id);
+        if (optionalTweet.isEmpty() || optionalTweet.get().isDeleted()) {
             throw new NotFoundException("No tweet found with id: " + id);
         }
 
-        Tweet tweet = tweetRepository.findById(id).get();
+        Tweet tweet = optionalTweet.get();
 
         List<Tweet> before = getTweetContextBefore(tweet);
 
         List<Tweet> after = new ArrayList<>();
         getTweetContextAfter(tweet, after);
         after.sort(Comparator.comparing(Tweet::getPosted));
+        after.removeIf(a -> a.isDeleted());
 
         return new ContextDto(
                 tweetMapper.entityToResponseDto(tweet),
@@ -347,6 +349,7 @@ public class TweetServiceImpl implements TweetService {
             before.add(tweet.getInReplyTo());
             tweet = tweet.getInReplyTo();
         }
+        before.removeIf(a -> a.isDeleted());
         return before;
     }
 
