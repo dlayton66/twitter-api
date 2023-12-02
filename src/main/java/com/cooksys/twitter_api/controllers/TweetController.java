@@ -54,8 +54,8 @@ public class TweetController {
     }
 
     @GetMapping("/{id}/context")
-    public ResponseEntity<ContextDto> getContextOfTweet(@PathVariable Long id){
-        return ResponseEntity.ok(tweetService.getContextOfTweet(id));
+    public ResponseEntity<ContextDto> getTweetContext(@PathVariable Long id){
+        return ResponseEntity.ok(tweetService.getTweetContext(id));
     }
 
     @GetMapping("/{id}/likes")
