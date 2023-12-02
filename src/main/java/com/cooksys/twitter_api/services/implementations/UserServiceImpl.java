@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByUsername(String username) {
-        Optional<User> requestedUser = userRepository.findByCredentialsUsername(username);
+        Optional<User> requestedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
         if(requestedUser.isEmpty()){throw new NotFoundException("No one exists with username: " + username);}
         return userMapper.entityToResponseDto( requestedUser.get());
     }
