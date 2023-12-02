@@ -6,6 +6,7 @@ import com.cooksys.twitter_api.dtos.TweetResponseDto;
 import com.cooksys.twitter_api.dtos.UserResponseDto;
 import com.cooksys.twitter_api.entities.User;
 import com.cooksys.twitter_api.exceptions.BadRequestException;
+import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
 import com.cooksys.twitter_api.exceptions.NotFoundException;
 import com.cooksys.twitter_api.mappers.CredentialsMapper;
 import com.cooksys.twitter_api.mappers.ProfileMapper;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CredentialsMapper credentialsMapper;
     private final ProfileMapper profileMapper;
+
 
 
 
@@ -74,14 +75,47 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateUserProfile(String username, CredentialsDto credentials, ProfileDto profile) {
 
-        return null;
+        Optional<User> existingUser = userRepository.findByCredentialsUsername(username);
+        if (existingUser.isEmpty()) {
+            throw new NotFoundException("No one exists with username: " + username);
+        }
+
+        User userToUpdate = existingUser.get();
+
+        // Update the profile
+        userToUpdate.getProfile().setFirstName(profile.getFirstName());
+        userToUpdate.getProfile().setLastName(profile.getLastName());
+        userToUpdate.getProfile().setEmail(profile.getEmail());
+        userToUpdate.getProfile().setPhone(profile.getPhone());
+
+        User savedUser = userRepository.saveAndFlush(userToUpdate);
+        return userMapper.entityToResponseDto(savedUser);
     }
 
     @Override
     public UserResponseDto deleteUser(String username, CredentialsDto credentials) {
 
-        return null;
+        Optional<User> authenticatedUser = userRepository.findByCredentialsUsername(username);
+
+        Optional<User> existingUser = userRepository.findByCredentialsUsername(username);
+        if (existingUser.isEmpty()) {
+            throw new NotFoundException("No user exists with username: " + username);
+        }
+
+        User userToDelete = existingUser.get();
+
+        // Check if the authenticated user has the authority to delete the existing user
+        if (!authenticatedUser.equals(existingUser)) {
+            throw new NotAuthorizedException("You are not authorized to delete this user");
+        }
+
+        userToDelete.setDeleted(true);
+
+        User savedUser = userRepository.saveAndFlush(userToDelete);
+
+        return userMapper.entityToResponseDto(savedUser);
     }
+
 
     @Override
     public void followUser(String username, CredentialsDto credentials) {
