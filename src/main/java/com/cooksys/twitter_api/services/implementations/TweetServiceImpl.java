@@ -37,6 +37,197 @@ public class TweetServiceImpl implements TweetService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    // endpoints
+
+    @Override
+    public Set<TweetResponseDto> getAllTweets() {
+        Set<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
+        return tweetMapper.entitiesToResponseDtos(tweets);
+    }
+
+    @Override
+    @Transactional
+    public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
+        User author = areCredentialsValid(tweetRequestDto.getCredentials());
+        // Map request to Entity.
+        Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
+        newTweet.setAuthor(author);
+        author.getTweets().add(newTweet);
+        userRepository.save(author);
+
+        // Process hashtags.
+        processHashtags(newTweet);
+
+        // Process mentions.
+        processMentions(newTweet);
+
+        // Save the tweet with all relationships set, then return it.
+        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(newTweet));
+    }
+
+    @Override
+    public TweetResponseDto getTweetById(Long id) {
+        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
+        if(requestedTweet.isEmpty()){
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+        return tweetMapper.entityToResponseDto(requestedTweet.get());
+    }
+
+    @Override
+    public Set<TweetResponseDto> getRepliesToTweet(Long id) {
+        Optional<Tweet> originalTweet = tweetRepository.findByIdAndDeletedFalse(id);
+        if(originalTweet.isEmpty()){
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+        return tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyToAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending()));
+    }
+
+    @Override
+    public Set<UserResponseDto> getUsersMentionedInTweet(Long id) {
+        if (!tweetRepository.existsById(id)) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        Set<User> mentionedUsers = userRepository.findUserByDeletedIsFalseAndMentionsId(id);
+        return userMapper.entitiesToResponseDtos(mentionedUsers);
+    }
+
+    @Override
+    public Set<TweetResponseDto> getRepostsOfTweet(Long id) {
+        Optional<Tweet> originalTweet= tweetRepository.findByIdAndDeletedFalse(id);
+        if(originalTweet.isEmpty()){throw new NotFoundException("Original tweet doesn't exist or was deleted.");}
+        Optional<Set<Tweet>> reposts = tweetRepository.findByRepostOfAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending());
+        if (reposts.isEmpty()){return new HashSet<TweetResponseDto>();}
+        return tweetMapper.entitiesToResponseDtos(reposts.get());
+    }
+
+    @Override
+    public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
+        User author = areCredentialsValid(credentialsDto);
+
+        // Retrieve the original tweet or repost.
+        Optional<Tweet> tweetToRepost = tweetRepository.findByIdAndDeletedFalse(id);
+        if (tweetToRepost.isEmpty()) {
+            throw new NotFoundException("Tweet being reposted doesn't exist");
+        }
+
+        // Trace back to the original tweet if it's a repost.
+        Tweet originalTweet = tweetToRepost.get();
+        while (originalTweet.getRepostOf() != null) {
+            originalTweet = originalTweet.getRepostOf();
+        }
+
+        // Create a new tweet as a repost of the original tweet.
+        Tweet repost = new Tweet();
+        repost.setRepostOf(originalTweet);
+        repost.setDeleted(false);
+        repost.setAuthor(author);
+        repost.setPosted(Timestamp.from(Instant.now()));
+        repost.setInReplyTo(null);
+        repost.setReplies(new HashSet<>());
+        repost.setContent(null);
+
+        // Save the repost tweet and return its data.
+        Tweet savedRepost = tweetRepository.saveAndFlush(repost);
+        return tweetMapper.entityToResponseDto(savedRepost);
+    }
+
+    @Override
+    public ContextDto getTweetContext(Long id) {
+        if (!tweetRepository.existsById(id)) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        Tweet tweet = tweetRepository.findById(id).get();
+
+        List<Tweet> before = getTweetContextBefore(tweet);
+
+        List<Tweet> after = new ArrayList<>();
+        getTweetContextAfter(tweet, after);
+        after.sort(Comparator.comparing(Tweet::getPosted));
+
+        return new ContextDto(
+                tweetMapper.entityToResponseDto(tweet),
+                tweetMapper.entitiesToResponseDtos(before),
+                tweetMapper.entitiesToResponseDtos(after)
+        );
+    }
+
+    @Override
+    public Set<UserResponseDto> getLikesOnTweet(Long id) {
+        Optional<Tweet> tweet =  tweetRepository.findByIdAndDeletedFalse(id);
+        if(tweet.isEmpty()){
+            throw new NotFoundException("Tweet doesn't exist or was deleted.");
+        }
+        return userMapper.entitiesToResponseDtos( tweet.get().getLikes());
+    }
+
+    @Override
+    public Set<HashtagDto> getHashtagsOnTweet(Long id) {
+        if (!tweetRepository.existsById(id)) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        Set<Hashtag> tweetHashtags= hashtagRepository.findHashtagsByTweetsId(id);
+        return hashtagMapper.entitiesToDto(tweetHashtags);
+    }
+
+    @Override
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Optional<Tweet> deletedTweet = tweetRepository.findById(id);
+        if (deletedTweet.isEmpty()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        User user = areCredentialsValid(credentialsDto);
+
+        deletedTweet.get().setDeleted(true);
+        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(deletedTweet.get()));
+    }
+
+    @Override
+    public void likeTweet(Long id, CredentialsDto credentialsDto) {
+        Optional<Tweet> likedTweet = tweetRepository.findById(id);
+        if (likedTweet.isEmpty() || likedTweet.get().isDeleted()) {
+            throw new NotFoundException("No tweet found with id: " + id);
+        }
+
+        User user = areCredentialsValid(credentialsDto);
+
+        likedTweet.get().getLikes().add(user);
+        tweetRepository.saveAndFlush(likedTweet.get());
+    }
+
+    @Override
+    public TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
+        // Credentials validation
+        User author = areCredentialsValid(tweetRequestDto.getCredentials());
+
+        // Find the parent tweet, handling the case where it might not exist.
+        Optional<Tweet> parentTweet = tweetRepository.findByIdAndDeletedFalse(id);
+        if (parentTweet.isEmpty()) {
+            throw new NotFoundException("Tweet is either deleted or never existed.");
+        }
+
+        // Map the request DTO to a new Tweet entity and set its properties.
+        Tweet newReplyTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
+        newReplyTweet.setAuthor(author);
+        newReplyTweet.setInReplyTo(parentTweet.get());
+
+        // Process hashtags and mentions for the reply tweet.
+        processHashtags(newReplyTweet);
+        processMentions(newReplyTweet);
+
+        // Save the new reply tweet and update the parent tweet with the reply.
+        Tweet savedReplyTweet = tweetRepository.saveAndFlush(newReplyTweet);
+        parentTweet.get().getReplies().add(savedReplyTweet);
+        tweetRepository.saveAndFlush(parentTweet.get());
+
+        // Convert the saved reply tweet to a DTO and return it.
+        return tweetMapper.entityToResponseDto(savedReplyTweet);
+    }
+
     // helper methods
 
     User areCredentialsValid(CredentialsDto credentialsDto){
@@ -150,180 +341,22 @@ public class TweetServiceImpl implements TweetService {
         userRepository.saveAllAndFlush(mentionedExistingUsers);
     }
 
-    // endpoints
-
-    @Override
-    public Set<TweetResponseDto> getAllTweets() {
-        Set<Tweet> tweets = tweetRepository.getByDeletedFalse(Sort.by("posted").descending());
-        return tweetMapper.entitiesToResponseDtos(tweets);
-    }
-
-    @Override
-    @Transactional
-    public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
-        User author = areCredentialsValid(tweetRequestDto.getCredentials());
-        // Map request to Entity.
-        Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
-        newTweet.setAuthor(author);
-        author.getTweets().add(newTweet);
-        userRepository.save(author);
-
-        // Process hashtags.
-        processHashtags(newTweet);
-
-        // Process mentions.
-        processMentions(newTweet);
-
-        // Save the tweet with all relationships set, then return it.
-        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(newTweet));
-    }
-
-    @Override
-    public TweetResponseDto getTweetById(Long id) {
-        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
-        if(requestedTweet.isEmpty()){
-            throw new NotFoundException("No tweet found with id: " + id);
+    public List<Tweet> getTweetContextBefore(Tweet tweet) {
+        List<Tweet> before = new ArrayList<>();
+        while (tweet.getInReplyTo() != null) {
+            before.add(tweet.getInReplyTo());
+            tweet = tweet.getInReplyTo();
         }
-        return tweetMapper.entityToResponseDto(requestedTweet.get());
+        return before;
     }
 
-    @Override
-    public Set<TweetResponseDto> getRepliesToTweet(Long id) {
-        Optional<Tweet> originalTweet = tweetRepository.findByIdAndDeletedFalse(id);
-        if(originalTweet.isEmpty()){
-            throw new NotFoundException("No tweet found with id: " + id);
+    public void getTweetContextAfter(Tweet tweet, List<Tweet> after) {
+        if (!tweet.getReplies().isEmpty()) {
+            after.addAll(tweet.getReplies());
+            for (Tweet nextTweet : tweet.getReplies()) {
+                getTweetContextAfter(nextTweet, after);
+            }
         }
-        return tweetMapper.entitiesToResponseDtos( tweetRepository.findByInReplyToAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending()));
     }
-
-    @Override
-    public Set<UserResponseDto> getUsersMentionedInTweet(Long id) {
-        if (!tweetRepository.existsById(id)) {
-            throw new NotFoundException("No tweet found with id: " + id);
-        }
-
-        Set<User> mentionedUsers = userRepository.findUserByDeletedIsFalseAndMentionsId(id);
-        return userMapper.entitiesToResponseDtos(mentionedUsers);
-    }
-
-    @Override
-    public Set<TweetResponseDto> getRepostsOfTweet(Long id) {
-        Optional<Tweet> originalTweet= tweetRepository.findByIdAndDeletedFalse(id);
-        if(originalTweet.isEmpty()){throw new NotFoundException("Original tweet doesn't exist or was deleted.");}
-        Optional<Set<Tweet>> reposts = tweetRepository.findByRepostOfAndDeletedFalse(originalTweet.get(), Sort.by("posted").descending());
-        if (reposts.isEmpty()){return new HashSet<TweetResponseDto>();}
-        return tweetMapper.entitiesToResponseDtos(reposts.get());
-    }
-
-    @Override
-    public TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto) {
-        User author = areCredentialsValid(credentialsDto);
-
-        // Retrieve the original tweet or repost.
-        Optional<Tweet> tweetToRepost = tweetRepository.findByIdAndDeletedFalse(id);
-        if (tweetToRepost.isEmpty()) {
-            throw new NotFoundException("Tweet being reposted doesn't exist");
-        }
-
-        // Trace back to the original tweet if it's a repost.
-        Tweet originalTweet = tweetToRepost.get();
-        while (originalTweet.getRepostOf() != null) {
-            originalTweet = originalTweet.getRepostOf();
-        }
-
-        // Create a new tweet as a repost of the original tweet.
-        Tweet repost = new Tweet();
-        repost.setRepostOf(originalTweet);
-        repost.setDeleted(false);
-        repost.setAuthor(author);
-        repost.setPosted(Timestamp.from(Instant.now()));
-        repost.setInReplyTo(null);
-        repost.setReplies(new HashSet<>());
-        repost.setContent(null);
-
-        // Save the repost tweet and return its data.
-        Tweet savedRepost = tweetRepository.saveAndFlush(repost);
-        return tweetMapper.entityToResponseDto(savedRepost);
-    }
-
-    @Override
-    public ContextDto getContextOfTweet(Long id) {
-        return null;
-    }
-
-    @Override
-    public Set<UserResponseDto> getLikesOnTweet(Long id) {
-        Optional<Tweet> tweet =  tweetRepository.findByIdAndDeletedFalse(id);
-        if(tweet.isEmpty()){
-            throw new NotFoundException("Tweet doesn't exist or was deleted.");
-        }
-        return userMapper.entitiesToResponseDtos( tweet.get().getLikes());
-    }
-
-    @Override
-    public Set<HashtagDto> getHashtagsOnTweet(Long id) {
-        if (!tweetRepository.existsById(id)) {
-            throw new NotFoundException("No tweet found with id: " + id);
-        }
-
-        Set<Hashtag> tweetHashtags= hashtagRepository.findHashtagsByTweetsId(id);
-        return hashtagMapper.entitiesToDto(tweetHashtags);
-    }
-
-    @Override
-    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
-        Optional<Tweet> deletedTweet = tweetRepository.findById(id);
-        if (deletedTweet.isEmpty()) {
-            throw new NotFoundException("No tweet found with id: " + id);
-        }
-
-        User user = areCredentialsValid(credentialsDto);
-
-        deletedTweet.get().setDeleted(true);
-        return tweetMapper.entityToResponseDto(tweetRepository.saveAndFlush(deletedTweet.get()));
-    }
-
-    @Override
-    public void likeTweet(Long id, CredentialsDto credentialsDto) {
-        Optional<Tweet> likedTweet = tweetRepository.findById(id);
-        if (likedTweet.isEmpty() || likedTweet.get().isDeleted()) {
-            throw new NotFoundException("No tweet found with id: " + id);
-        }
-
-        User user = areCredentialsValid(credentialsDto);
-
-        likedTweet.get().getLikes().add(user);
-        tweetRepository.saveAndFlush(likedTweet.get());
-    }
-
-    @Override
-    public TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
-        // Credentials validation
-        User author = areCredentialsValid(tweetRequestDto.getCredentials());
-
-        // Find the parent tweet, handling the case where it might not exist.
-        Optional<Tweet> parentTweet = tweetRepository.findByIdAndDeletedFalse(id);
-        if (parentTweet.isEmpty()) {
-            throw new NotFoundException("Tweet is either deleted or never existed.");
-        }
-
-        // Map the request DTO to a new Tweet entity and set its properties.
-        Tweet newReplyTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
-        newReplyTweet.setAuthor(author);
-        newReplyTweet.setInReplyTo(parentTweet.get());
-
-        // Process hashtags and mentions for the reply tweet.
-        processHashtags(newReplyTweet);
-        processMentions(newReplyTweet);
-
-        // Save the new reply tweet and update the parent tweet with the reply.
-        Tweet savedReplyTweet = tweetRepository.saveAndFlush(newReplyTweet);
-        parentTweet.get().getReplies().add(savedReplyTweet);
-        tweetRepository.saveAndFlush(parentTweet.get());
-
-        // Convert the saved reply tweet to a DTO and return it.
-        return tweetMapper.entityToResponseDto(savedReplyTweet);
-    }
-
 
 }

@@ -20,7 +20,7 @@ public interface TweetService {
 
     TweetResponseDto repostTweet(Long id, CredentialsDto credentialsDto);
 
-    ContextDto getContextOfTweet(Long id);
+    ContextDto getTweetContext(Long id);
 
     Set<UserResponseDto> getLikesOnTweet(Long id);
 

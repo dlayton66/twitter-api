@@ -5,6 +5,7 @@ import com.cooksys.twitter_api.dtos.TweetResponseDto;
 import com.cooksys.twitter_api.entities.Tweet;
 import org.mapstruct.Mapper;
 
+import java.util.List;
 import java.util.Set;
 @Mapper(componentModel = "spring", uses = { UserMapper.class })
 public interface TweetMapper {
@@ -16,5 +17,8 @@ public interface TweetMapper {
   Set<Tweet> requestDtosToEntities(Set<TweetRequestDto> tweetRequestDtos);
 
   Set<TweetResponseDto> entitiesToResponseDtos(Set<Tweet> tweets);
+
+  List<TweetResponseDto> entitiesToResponseDtos(List<Tweet> tweets);
+
 
 }
