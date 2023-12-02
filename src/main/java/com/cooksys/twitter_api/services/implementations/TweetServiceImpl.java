@@ -181,7 +181,7 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public TweetResponseDto getTweetById(Long id) {
-        Optional<Tweet> requestedTweet = tweetRepository.findById(id);
+        Optional<Tweet> requestedTweet = tweetRepository.findByIdAndDeletedFalse(id);
         if(requestedTweet.isEmpty()){
             throw new NotFoundException("No tweet found with id: " + id);
         }
