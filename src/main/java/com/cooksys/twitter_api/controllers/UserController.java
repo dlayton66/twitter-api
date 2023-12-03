@@ -19,22 +19,22 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public Set<UserResponseDto> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<Set<UserResponseDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @PostMapping
-    public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
-        return userService.createUser(userRequestDto.getCredentials(), userRequestDto.getProfile());
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequestDto) {
+        return ResponseEntity.ok(userService.createUser(userRequestDto.getCredentials(), userRequestDto.getProfile()));
     }
 
     @GetMapping("/@{username}")
-    public UserResponseDto getUserByUsername(@PathVariable String username) {
-        return userService.getUserByUsername(username);
+    public ResponseEntity<UserResponseDto> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @PatchMapping("/{username}")
-    public UserResponseDto updateUserProfile(
+    public ResponseEntity<UserResponseDto> updateUserProfile(
             @PathVariable String username,
             @RequestBody UserRequestDto userRequestDto
     ) {
@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{username}")
-    public UserResponseDto deleteUser(@PathVariable String username, @RequestBody CredentialsDto credentials) {
-        return userService.deleteUser(username, credentials);
+    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable String username, @RequestBody CredentialsDto credentials) {
+        return ResponseEntity.ok(userService.deleteUser(username, credentials));
     }
 
     @PostMapping("/{username}/follow")
@@ -57,13 +57,13 @@ public class UserController {
     }
 
     @GetMapping("/{username}/feed")
-    public Set<TweetResponseDto> getUserFeed(@PathVariable String username) {
-        return userService.getUserFeed(username);
+    public ResponseEntity<Set<TweetResponseDto>> getUserFeed(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserFeed(username));
     }
 
     @GetMapping("/{username}/tweets")
-    public Set<TweetResponseDto> getUserTweets(@PathVariable String username) {
-        return userService.getUserTweets(username);
+    public ResponseEntity<Set<TweetResponseDto>> getUserTweets(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserTweets(username));
     }
 
     @GetMapping("/{username}/mentions")

@@ -15,7 +15,6 @@ import com.cooksys.twitter_api.services.ValidateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.Optional;
 
 @Service
@@ -45,7 +44,7 @@ public class UserServiceImpl implements UserService {
         if(desiredUsername == null || password == null || email == null){
             throw new BadRequestException("Username, password, and email are required.");
         }
-        Optional<User> possibleUser = userRepository.findByCredentialsUsername(desiredUsername);
+        Optional<User> possibleUser = userRepository.findByCredentialsUsernameAndDeletedFalse(desiredUsername);
         if(possibleUser.isEmpty()){
             User newUser = new User();
             newUser.setCredentials(credentialsMapper.dtoToEntity(credentials));
@@ -65,7 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserByUsername(String username) {
-        Optional<User> requestedUser = userRepository.findByCredentialsUsername(username);
+        Optional<User> requestedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
         if(requestedUser.isEmpty()){throw new NotFoundException("No one exists with username: " + username);}
         return userMapper.entityToResponseDto( requestedUser.get());
     }

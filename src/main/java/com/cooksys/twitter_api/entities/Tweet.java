@@ -1,19 +1,21 @@
 package com.cooksys.twitter_api.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude =
+        {"author", "inReplyTo", "replies", "repostOf", "reposts", "hashtags", "likes", "mentions"})
+
 public class Tweet {
 
   @Id
