@@ -8,6 +8,7 @@ import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
 import com.cooksys.twitter_api.exceptions.NotFoundException;
 import com.cooksys.twitter_api.mappers.CredentialsMapper;
 import com.cooksys.twitter_api.mappers.ProfileMapper;
+import com.cooksys.twitter_api.mappers.TweetMapper;
 import com.cooksys.twitter_api.mappers.UserMapper;
 import com.cooksys.twitter_api.repositories.UserRepository;
 import com.cooksys.twitter_api.services.UserService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CredentialsMapper credentialsMapper;
     private final ProfileMapper profileMapper;
+    private final TweetMapper tweetMapper;
 
     private final ValidateService validationService;
 
@@ -72,17 +75,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUserProfile(String username, UserRequestDto userRequestDto) {
-        if( userRequestDto == null){
-            throw new BadRequestException("User must be supplied");
+        if (username == null){
+            throw new BadRequestException("Username string must be supplied");
         }
-        if (!validationService.usernameExists(username) ) {
-            throw new BadRequestException("Please provide a username");
+        if( userRequestDto == null ||  userRequestDto.getCredentials() == null || userRequestDto.getCredentials().getUsername() == null || userRequestDto.getCredentials().getPassword() == null){
+            throw new BadRequestException("Complete credentials must be supplied");
         }
+
 
         Optional<User> existingUserOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
 
         if (existingUserOptional.isEmpty()) {
-            throw new BadRequestException("No one exists with username: " + username);
+            throw new NotFoundException("No one exists with username: " + username);
         }
 
         User existingUser = existingUserOptional.get();
@@ -185,7 +189,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Set<TweetResponseDto> getUserTweets(String username) {
-        return null;
+        Optional<User> requestedUser =  userRepository.findByCredentialsUsernameAndDeletedFalse(username);
+        if(requestedUser.isEmpty()){
+            throw new NotFoundException("Requested user doesn't exist or is deleted.");
+        }
+        return tweetMapper.entitiesToResponseDtos(requestedUser.get().getTweets().stream().filter(eachTweet -> !eachTweet.isDeleted()).collect(Collectors.toSet()));
     }
 
     @Override
@@ -195,12 +203,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Set<UserResponseDto> getFollowers(String username) {
-        return null;
+        Optional<User> requestedUser =  userRepository.findByCredentialsUsernameAndDeletedFalse(username);
+        if(requestedUser.isEmpty()){
+            throw new NotFoundException("Requested user doesn't exist or is deleted.");
+        }
+        return userMapper.entitiesToResponseDtos(requestedUser.get().getFollowers().stream().filter(eachUser -> !eachUser.isDeleted()).collect(Collectors.toSet()));
     }
 
     @Override
     public Set<UserResponseDto> getFollowing(String username) {
-        return null;
+        Optional<User> requestedUser =  userRepository.findByCredentialsUsernameAndDeletedFalse(username);
+        if(requestedUser.isEmpty()){
+            throw new NotFoundException("Requested user doesn't exist or is deleted.");
+        }
+        return userMapper.entitiesToResponseDtos(requestedUser.get().getFollowing().stream().filter(eachUser -> !eachUser.isDeleted()).collect(Collectors.toSet()));
     }
 
 }
