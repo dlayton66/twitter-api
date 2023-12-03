@@ -12,7 +12,7 @@ public interface UserService {
 
     UserResponseDto getUserByUsername(String username);
 
-    UserResponseDto updateUserProfile(String username, CredentialsDto credentials, ProfileDto profile);
+    UserResponseDto updateUserProfile(String username, UserRequestDto userRequestDto);
 
     UserResponseDto deleteUser(String username, CredentialsDto credentials);
 
