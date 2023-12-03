@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
         if(desiredUsername == null || password == null || email == null){
             throw new BadRequestException("Username, password, and email are required.");
         }
-        Optional<User> possibleUser = userRepository.findByCredentialsUsernameAndDeletedFalse(desiredUsername);
+        Optional<User> possibleUser = userRepository.findByCredentialsUsername(desiredUsername);
         if(possibleUser.isEmpty()){
             User newUser = new User();
             newUser.setCredentials(credentialsMapper.dtoToEntity(credentials));
@@ -71,11 +72,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUserProfile(String username, UserRequestDto userRequestDto) {
-        if (!validationService.usernameExists(username) || userRequestDto == null) {
+        if( userRequestDto == null){
+            throw new BadRequestException("User must be supplied");
+        }
+        if (!validationService.usernameExists(username) ) {
             throw new BadRequestException("Please provide a username");
         }
 
-        Optional<User> existingUserOptional = userRepository.findByCredentialsUsername(username);
+        Optional<User> existingUserOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
 
         if (existingUserOptional.isEmpty()) {
             throw new BadRequestException("No one exists with username: " + username);
@@ -91,35 +95,33 @@ public class UserServiceImpl implements UserService {
         Profile profileToUpdate = existingUser.getProfile();
         ProfileDto updatedProfileDto = userRequestDto.getProfile();
 
-        profileToUpdate.setFirstName(updatedProfileDto.getFirstName());
-        profileToUpdate.setLastName(updatedProfileDto.getLastName());
-        profileToUpdate.setEmail(updatedProfileDto.getEmail());
-        profileToUpdate.setPhone(updatedProfileDto.getPhone());
+        if (updatedProfileDto != null) {
+            if (updatedProfileDto.getFirstName() != null) {
+                profileToUpdate.setFirstName(updatedProfileDto.getFirstName());
+            }
+            if (updatedProfileDto.getLastName() != null) {
+                profileToUpdate.setLastName(updatedProfileDto.getLastName());
+            }
+            if (updatedProfileDto.getEmail() != null) {
+                profileToUpdate.setEmail(updatedProfileDto.getEmail());
+            }
+            if (updatedProfileDto.getPhone() != null) {
+                profileToUpdate.setPhone(updatedProfileDto.getPhone());
+            }
+        }
 
         // Save and return the updated profile
-        userRepository.saveAndFlush(existingUser);
-
-        // Construct the response
-        UserResponseDto responseDto = new UserResponseDto();
-        responseDto.setUsername(existingUser.getProfile().getFirstName());
-        responseDto.setJoined(existingUser.getJoined());
-        responseDto.setProfile(new ProfileDto(
-                profileToUpdate.getFirstName(),
-                profileToUpdate.getLastName(),
-                profileToUpdate.getEmail(),
-                profileToUpdate.getPhone()
-        ));
-
-        return responseDto;
+        return userMapper.entityToResponseDto( userRepository.saveAndFlush(existingUser));
     }
+
 
     @Override
     public UserResponseDto deleteUser(String username, CredentialsDto credentials) {
         if(username == null || credentials == null) throw new BadRequestException("Credentials and Profile are required.");
 
-        Optional<User> authenticatedUser = userRepository.findByCredentialsUsername(username);
+        Optional<User> authenticatedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
 
-        Optional<User> existingUser = userRepository.findByCredentialsUsername(username);
+        Optional<User> existingUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
         if (existingUser.isEmpty()) {throw new NotFoundException("No user exists with username: " + username);}
 
         User userToDelete = existingUser.get();
@@ -140,12 +142,12 @@ public class UserServiceImpl implements UserService {
         if(followerUsername == null || credentials == null) {throw new BadRequestException("Credentials and Profile are required.");}
 
         // Find the user who is being followed
-        Optional<User> userToBeFollowedOptional = userRepository.findByCredentialsUsername(followerUsername);
+        Optional<User> userToBeFollowedOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(followerUsername);
         if (userToBeFollowedOptional.isEmpty()) {throw new NotFoundException("No user found with username: " + followerUsername);}
 
         User userToBeFollowed = userToBeFollowedOptional.get();
         // Find the follower
-        Optional<User> followerOptional = userRepository.findByCredentialsUsername(credentials.getUsername());
+        Optional<User> followerOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(credentials.getUsername());
         if (followerOptional.isEmpty()) {throw new NotFoundException("Follower not found with username: " + credentials.getUsername());}
 
         User follower = followerOptional.get();
@@ -161,12 +163,12 @@ public class UserServiceImpl implements UserService {
         if(username == null || credentials == null) throw new BadRequestException("Credentials and Profile are required.");
 
         // Find the user who is being unfollowed
-        Optional<User> userToBeUnfollowedOptional = userRepository.findByCredentialsUsername(username);
+        Optional<User> userToBeUnfollowedOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
         if (userToBeUnfollowedOptional.isEmpty()) throw new NotFoundException("No user found with username: " + username);
 
         User userToBeUnfollowed = userToBeUnfollowedOptional.get();
         // Find the follower
-        Optional<User> unFollowerOptional = userRepository.findByCredentialsUsername(credentials.getUsername());
+        Optional<User> unFollowerOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(credentials.getUsername());
         if (unFollowerOptional.isEmpty()) throw new NotFoundException("Follower not found with username: " + credentials.getUsername());
 
         User unFollower = unFollowerOptional.get();
