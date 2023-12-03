@@ -18,7 +18,6 @@ public class UserController {
 
     private final UserService userService;
 
-
     @GetMapping
     public ResponseEntity<Set<UserResponseDto>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
@@ -39,7 +38,7 @@ public class UserController {
             @PathVariable String username,
             @RequestBody UserRequestDto userRequestDto
     ) {
-        return ResponseEntity.ok(userService.updateUserProfile(username, userRequestDto.getCredentials(), userRequestDto.getProfile()));
+        return userService.updateUserProfile(username, userRequestDto);
     }
 
     @DeleteMapping("/{username}")
