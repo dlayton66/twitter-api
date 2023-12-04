@@ -187,8 +187,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void unfollowUser(String username, CredentialsDto credentials) {
-        if (username == null || credentials == null)
-            throw new BadRequestException("Credentials and Profile are required.");
+        if (credentials == null || credentials.getUsername() == null || credentials.getPassword() == null) {
+            throw new BadRequestException("Credentials are required.");
+        }
 
         // Find the user who is being unfollowed
         Optional<User> userToBeUnfollowedOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
