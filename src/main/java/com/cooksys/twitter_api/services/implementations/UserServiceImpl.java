@@ -249,7 +249,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<TweetResponseDto> getMentions(String username) {
-        return null;
+        Optional<User> requestedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
+        if (requestedUser.isEmpty()) {
+            throw new NotFoundException("Requested user doesn't exist or is deleted.");
+        }
+
+        List<Tweet> mentions = new ArrayList<>(requestedUser.get().getMentions());
+        mentions.removeIf(Tweet::isDeleted);
+        mentions.sort(Comparator.comparing(Tweet::getPosted));
+
+        return tweetMapper.entitiesToResponseDtos(mentions);
     }
 
     @Override
