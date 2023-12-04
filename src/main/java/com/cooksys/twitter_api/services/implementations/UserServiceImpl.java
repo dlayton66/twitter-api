@@ -176,8 +176,11 @@ public class UserServiceImpl implements UserService {
         if (followerOptional.isEmpty()) {
             throw new NotFoundException("Follower not found with username: " + credentials.getUsername());
         }
-
         User follower = followerOptional.get();
+
+        if (userToBeFollowed.getFollowers().contains(follower)) {
+            throw new BadRequestException("User is already followed.");
+        }
         // Add the follower to the user's followers
         userToBeFollowed.getFollowers().add(follower);
 
