@@ -78,8 +78,14 @@ public class UserServiceImpl implements UserService {
         if (username == null){
             throw new BadRequestException("Username string must be supplied");
         }
-        if( userRequestDto == null ||  userRequestDto.getCredentials() == null || userRequestDto.getCredentials().getUsername() == null || userRequestDto.getCredentials().getPassword() == null){
+        if (userRequestDto == null) {
+            throw new BadRequestException("Request body must be supplied");
+        }
+        if(userRequestDto.getCredentials() == null || userRequestDto.getCredentials().getUsername() == null || userRequestDto.getCredentials().getPassword() == null){
             throw new BadRequestException("Complete credentials must be supplied");
+        }
+        if (userRequestDto.getProfile() == null) {
+            throw new BadRequestException("Profile field must be supplied");
         }
 
 
