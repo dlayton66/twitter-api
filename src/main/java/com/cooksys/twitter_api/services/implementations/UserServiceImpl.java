@@ -2,6 +2,7 @@ package com.cooksys.twitter_api.services.implementations;
 
 import com.cooksys.twitter_api.dtos.*;
 import com.cooksys.twitter_api.embeddables.Profile;
+import com.cooksys.twitter_api.entities.Tweet;
 import com.cooksys.twitter_api.entities.User;
 import com.cooksys.twitter_api.exceptions.BadRequestException;
 import com.cooksys.twitter_api.exceptions.NotAuthorizedException;
@@ -16,8 +17,7 @@ import com.cooksys.twitter_api.services.ValidateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -220,21 +220,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<TweetResponseDto> getUserFeed(String username) {
-        return null;
-    }
-
-    @Override
-    public Set<TweetResponseDto> getUserTweets(String username) {
+    public List<TweetResponseDto> getUserFeed(String username) {
         Optional<User> requestedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
         if (requestedUser.isEmpty()) {
             throw new NotFoundException("Requested user doesn't exist or is deleted.");
         }
-        return tweetMapper.entitiesToResponseDtos(requestedUser.get().getTweets().stream().filter(eachTweet -> !eachTweet.isDeleted()).collect(Collectors.toSet()));
+
+        List<Tweet> feedTweets = new ArrayList<>();
+        for (User userFollowing : requestedUser.get().getFollowing()) {
+            feedTweets.addAll(userFollowing.getTweets());
+        }
+        feedTweets.addAll(requestedUser.get().getTweets());
+        feedTweets.removeIf(Tweet::isDeleted);
+        feedTweets.sort(Comparator.comparing(Tweet::getPosted));
+
+        return tweetMapper.entitiesToResponseDtos(feedTweets);
+
     }
 
     @Override
-    public Set<TweetResponseDto> getMentions(String username) {
+    public List<TweetResponseDto> getUserTweets(String username) {
+        Optional<User> requestedUser = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
+        if (requestedUser.isEmpty()) {
+            throw new NotFoundException("Requested user doesn't exist or is deleted.");
+        }
+        return tweetMapper.entitiesToResponseDtos(requestedUser.get().getTweets().stream().filter(eachTweet -> !eachTweet.isDeleted()).collect(Collectors.toList()));
+    }
+
+    @Override
+    public List<TweetResponseDto> getMentions(String username) {
         return null;
     }
 

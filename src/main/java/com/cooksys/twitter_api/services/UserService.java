@@ -2,6 +2,7 @@ package com.cooksys.twitter_api.services;
 
 import com.cooksys.twitter_api.dtos.*;
 
+import java.util.List;
 import java.util.Set;
 
 public interface UserService {
@@ -20,11 +21,11 @@ public interface UserService {
 
     void unfollowUser(String username, CredentialsDto credentials);
 
-    Set<TweetResponseDto> getUserFeed(String username);
+    List<TweetResponseDto> getUserFeed(String username);
 
-    Set<TweetResponseDto> getUserTweets(String username);
+    List<TweetResponseDto> getUserTweets(String username);
 
-    Set<TweetResponseDto> getMentions(String username);
+    List<TweetResponseDto> getMentions(String username);
 
     Set<UserResponseDto> getFollowers(String username);
 
