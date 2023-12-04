@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -57,17 +58,17 @@ public class UserController {
     }
 
     @GetMapping("/@{username}/feed")
-    public ResponseEntity<Set<TweetResponseDto>> getUserFeed(@PathVariable String username) {
+    public ResponseEntity<List<TweetResponseDto>> getUserFeed(@PathVariable String username) {
         return ResponseEntity.ok(userService.getUserFeed(username));
     }
 
     @GetMapping("/@{username}/tweets")
-    public ResponseEntity<Set<TweetResponseDto>> getUserTweets(@PathVariable String username) {
+    public ResponseEntity<List<TweetResponseDto>> getUserTweets(@PathVariable String username) {
         return ResponseEntity.ok(userService.getUserTweets(username));
     }
 
     @GetMapping("/@{username}/mentions")
-    public ResponseEntity<Set<TweetResponseDto>> getMentions(@PathVariable String username) {
+    public ResponseEntity<List<TweetResponseDto>> getMentions(@PathVariable String username) {
         return ResponseEntity.ok(userService.getMentions(username));
     }
 
