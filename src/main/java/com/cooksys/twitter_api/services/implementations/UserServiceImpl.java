@@ -193,16 +193,23 @@ public class UserServiceImpl implements UserService {
 
         // Find the user who is being unfollowed
         Optional<User> userToBeUnfollowedOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(username);
-        if (userToBeUnfollowedOptional.isEmpty())
+        if (userToBeUnfollowedOptional.isEmpty()) {
             throw new NotFoundException("No user found with username: " + username);
+        }
 
         User userToBeUnfollowed = userToBeUnfollowedOptional.get();
+
         // Find the follower
         Optional<User> unFollowerOptional = userRepository.findByCredentialsUsernameAndDeletedFalse(credentials.getUsername());
-        if (unFollowerOptional.isEmpty())
+        if (unFollowerOptional.isEmpty()) {
             throw new NotFoundException("Follower not found with username: " + credentials.getUsername());
+        }
 
         User unFollower = unFollowerOptional.get();
+
+        if (!userToBeUnfollowed.getFollowers().contains(unFollower)) {
+            throw new BadRequestException("User is already unfollowed");
+        }
         // Remove the follower to the user's followers
         userToBeUnfollowed.getFollowers().remove(unFollower);
 
