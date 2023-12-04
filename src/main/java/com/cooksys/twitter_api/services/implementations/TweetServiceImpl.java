@@ -180,7 +180,11 @@ public class TweetServiceImpl implements TweetService {
             throw new NotFoundException("No tweet found with id: " + id);
         }
 
+
         Set<Hashtag> tweetHashtags = hashtagRepository.findHashtagsByTweetsId(id);
+        for (Hashtag hashtag : tweetHashtags) {
+            System.out.println(hashtag.getLabel());
+        }
         return hashtagMapper.entitiesToDto(tweetHashtags);
     }
 
@@ -279,12 +283,12 @@ public class TweetServiceImpl implements TweetService {
     private void processHashtags(Tweet tweet) {
         String content = tweet.getContent();
         // Scan text for hashtags, such as #hashtags.
-        Pattern hashtagPattern = Pattern.compile("#[A-Za-z0-9]+(?:\\b|$)");
+        Pattern hashtagPattern = Pattern.compile("#([A-Za-z0-9]+)(?:\\b|$)");
         Matcher hashtagMatcher = hashtagPattern.matcher(content);
         // Add all hashtags to a set, which ensures no duplicate hashtags.
         Set<String> allHashtagStrings = new HashSet<>();
         while (hashtagMatcher.find()) {
-            allHashtagStrings.add(hashtagMatcher.group());
+            allHashtagStrings.add(hashtagMatcher.group(1));
         }
 
         // Sets for new and existing hashtags.
